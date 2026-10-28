@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gimme My Face</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/*CSS*/
+  .drop input[type=file] { display:none; }
+  .drop textarea { width:100%; height:54px; transition:height .2s; margin-top:8px; background:#0b0710; color:#fff; border:1px solid var(--line);
+    border-radius:10px; padding:8px; font:12px var(--mono); }
+  .drop textarea:focus { height:180px; }
+  .drop .grow { flex:1; min-width:0; }
+  .keyrow { display:flex; gap:8px; margin:10px 0 0; }
+  .keyrow input { flex:1; background:#0b0710; color:#fff; border:1px solid var(--line); border-radius:10px; padding:10px; font:12px var(--mono); }
+  .keyrow button { border:0; border-radius:10px; padding:0 14px; background:var(--violet); color:#fff; font:400 13px var(--display); cursor:pointer; }
+  .err { color:var(--hot); text-align:center; min-height:1em; margin:8px 0 0; }
+  .take.loading { display:grid; place-items:center; aspect-ratio:3/4.6; color:#999; font:13px var(--hand); }
+  #log { font:11px var(--mono); color:var(--dim); white-space:pre-wrap; max-height:90px; overflow:auto; margin-top:10px; }
+  .scene .notme { background:rgba(255,61,110,.92); }
+  .scene textarea { width:100%; min-height:54px; margin-top:4px; background:#0b0710; color:#ddd; border:1px solid var(--line);
+    border-radius:6px; font:10px var(--mono); padding:4px; }
+  .scene .tag { position:absolute; top:3px; right:4px; font:9px var(--mono); background:rgba(0,0,0,.6); padding:1px 4px; border-radius:4px; color:var(--amber); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">GIMME MY <b>FACE</b><small>my face · my song · my video</small></div>
+    <span class="pill" id="keypill">🔑 add key</span>
+  </header>
+
+  <!-- 1 · SIDE A -->
+  <section class="screen on" id="home">
+    <div class="cassette screws"><div class="label"><span class="side">A</span><div class="title" id="tapeTitle">your song here</div></div>
+      <div class="window"><div class="reel"></div><div class="reel"></div></div></div>
+    <div class="drops">
+      <label class="drop" id="d1"><span class="n">1</span><div class="grow"><h3>Drop your song</h3><p id="songinfo">mp3 · wav · m4a</p></div>
+        <span class="check" id="c1"></span><input type="file" id="song" accept="audio/*"></label>
+      <label class="drop" id="d2"><span class="n">2</span><div class="grow"><h3>Drop your face</h3><p>1–3 real photos. Glasses on if you wear 'em.</p></div>
+        <div class="thumbs" id="facethumbs"></div><input type="file" id="faces" accept="image/*" multiple></label>
+      <div class="drop" id="d3"><span class="n">3</span><div class="grow"><h3>Paste your lyrics</h3><p id="lyrinfo">we time every word to the beat</p>
+        <textarea id="lyrics" placeholder="[Verse 1]&#10;Came home to a new kind of prison…"></textarea></div></div>
+    </div>
+    <div class="vibes" id="vibes">
+      <span class="sticker s1 on" data-v="dark, moody, cinematic night, amber light">dark + moody</span>
+      <span class="sticker s2" data-v="warm, earthy, witchy, candlelight">witchy</span>
+      <span class="sticker s3" data-v="neon 1985 night, chrome, synthwave colors">neon '85</span>
+      <span class="sticker s4" data-v="sunny homestead, golden hour, gardens and animals">golden hour</span>
+      <span class="sticker s5" data-v="dreamy, soft focus, pastel haze">dreamy</span>
+    </div>
+    <div class="keyrow" id="keyrow"><input type="password" id="key" placeholder="your Comfy API key (your GPU, your bill)" autocomplete="off"><button id="savekey">USE</button></div>
+    <div class="rec-wrap"><button class="rec" id="rec"><span class="dot"></span><br>GIMME<br>MY FACE<small>PRESS REC</small></button></div>
+    <p class="err" id="err"></p>
+    <p class="fine"><span id="est">≈ $3–6 of GPU on <b>your</b> Comfy account</span> · ~15–30 min<br>No key? <a href="#" id="preview">free beat + lyric preview</a> on this computer.</p>
+  </section>
+
+  <!-- 2 · IS THIS YOU -->
+  <section class="screen" id="you">
+    <h2>Is this <em>you?</em></h2>
+    <p class="sub">Tap the one that's you. That face goes in every scene.</p>
+    <div class="takes" id="takes"></div>
+    <div class="row"><button class="btn no" id="again">Nope. Again.</button><button class="btn yes" id="thatsme" disabled>That's me →</button></div>
+    <div id="log"></div>
+    <p class="fine">AI kept giving me someone else's face. So I built this.</p>
+  </section>
+
+  <!-- 3 · MAKING -->
+  <section class="screen" id="making">
+    <div class="cassette screws spinning"><div class="label"><span class="side">A</span><div class="title" id="recTitle">rec</div></div>
+      <div class="window"><div class="reel"></div><div class="reel"></div></div></div>
+    <ul class="stages" id="stages">
+      <li class="todo" data-k="1/4">Rewinding your lyrics to the beat</li>
+      <li class="todo" data-k="2/4">Writing the storyboard</li>
+      <li class="todo" data-k="3/4">Making you, you</li>
+      <li class="todo" data-k="4/4">Cutting on the beat + captions on top</li>
+    </ul>
+    <div class="strip" id="strip"></div>
+    <div class="meter"><i id="meter"></i></div>
+    <div id="log2" style="font:11px var(--mono);color:var(--dim);white-space:pre-wrap;max-height:70px;overflow:auto;margin-top:8px"></div>
+    <p class="fine">Go grab a Tab. We'll ding you.</p>
+  </section>
+
+  <!-- 4 · DONE -->
+  <section class="screen" id="done">
+    <h2>That's <em>you.</em></h2>
+    <div class="phone"><video id="video" controls playsinline loop></video></div>
+    <div class="shares">
+      <a class="share main" id="dl" download><b>SAVE THE VIDEO</b><span>1080×1920 · captions on</span></a>
+      <button class="share" id="bopen2"><b>NOT ME?</b><span>re-roll any scene in the B-side</span></button>
+      <button class="share" id="home2"><b>NEW SONG</b><span>back to Side A</span></button>
+    </div>
+  </section>
+</div>
+
+<div class="bside-tab" id="openB">B-SIDE ▲<small>the pro drawer</small></div>
+<aside class="bside" id="bside" aria-label="Pro drawer">
+  <button class="close" id="closeB">×</button>
+  <h3>B-<em>SIDE</em></h3>
+  <p class="sub" style="font-size:12px">For when you want your hands on the knobs.</p>
+  <div class="knob"><label>Face strength <span id="fsv">0.70</span></label><input type="range" min="0.4" max="1" step="0.05" value="0.7" id="pin">
+    <p class="sub" style="font-size:11px;margin:4px 0 0">More = your face holds harder, less movement.</p></div>
+  <div class="knob"><label>Real face <span>FaceFusion, on your computer</span></label><div class="switch3" id="realface"><button data-v="on" class="on">my real face</button><button data-v="off">AI face only</button></div></div>
+  <div class="knob"><label>Motion</label><div class="switch3" id="motion"><button data-v="off">stills</button><button data-v="key" class="on">key moments</button><button data-v="all">every scene</button></div></div>
+  <div class="knob"><label>Your look <span>hair, ink, build: helps the face stay you</span></label>
+    <input type="text" id="who" placeholder="auburn hair up, glasses; L upper arm Ganesha, R arm tree of life; slim"></div>
+  <div class="knob"><label>The story <span>optional</span></label><input type="text" id="story" placeholder="rebuilding an old muscle car, and my life"></div>
+  <div class="knob"><label>End card</label><input type="text" id="endcard" placeholder="A ___ Joint"></div>
+  <div class="knob"><label>Scenes <span>"not me" re-rolls just that one</span></label><div class="scenes" id="scenes"><p class="sub" style="font-size:11px">Scenes show up here once they're made.</p></div></div>
+  <button class="btn yes" style="width:100%" id="recut">RE-CUT THE VIDEO</button>
+</aside>
+
+<script>
+const $ = id => document.getElementById(id);
+let project = null, timer = null, picked = 0, vibe = document.querySelector('.sticker.on').dataset.v, motion = 'key';
+const show = id => { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0,0); };
+const api = (url, body) => fetch(url, {method:'POST', body: JSON.stringify(Object.assign({p: project}, body))});
+
+$('song').onchange = () => { const f = $('song').files[0]; if (!f) return;
+  $('tapeTitle').textContent = f.name.replace(/\.[^.]+$/, ''); $('songinfo').textContent = f.name; $('c1').textContent = '✓'; $('d1').classList.add('done'); };
+$('faces').onchange = () => { $('facethumbs').innerHTML = [...$('faces').files].slice(0,3).map(f =>
+  `<div class="polaroid"><img src="${URL.createObjectURL(f)}" alt=""></div>`).join(''); $('d2').classList.add('done'); };
+$('lyrics').oninput = () => { const n = $('lyrics').value.split('\n').filter(l => l.trim() && !/^\[.*\]$/.test(l.trim())).length;
+  $('lyrinfo').textContent = n ? `${n} lines · we time every word to the beat` : 'we time every word to the beat'; $('d3').classList.toggle('done', n > 0); };
+document.querySelectorAll('.sticker').forEach(s => s.onclick = () => {
+  document.querySelectorAll('.sticker').forEach(x => x.classList.remove('on')); s.classList.add('on'); vibe = s.dataset.v; });
+document.querySelectorAll('#motion button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#motion button').forEach(x => x.classList.remove('on')); b.classList.add('on'); motion = b.dataset.v; });
+let realface = 'on';
+document.querySelectorAll('#realface button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#realface button').forEach(x => x.classList.remove('on')); b.classList.add('on'); realface = b.dataset.v; });
+$('pin').oninput = () => $('fsv').textContent = (+$('pin').value).toFixed(2);
+$('openB').onclick = $('bopen2').onclick = () => $('bside').classList.add('open');
+$('closeB').onclick = () => $('bside').classList.remove('open');
+$('home2').onclick = () => show('home');
+$('savekey').onclick = async () => { if (!$('key').value.trim()) return;
+  await fetch('/api/key', {method:'POST', body: JSON.stringify({key: $('key').value})}); $('key').value = ''; keyOn(); };
+function keyOn() { $('keypill').textContent = '🔑 key ✓'; $('keyrow').style.display = 'none'; }
+
+function form() {
+  if (!$('song').files[0]) { $('err').textContent = 'Drop your song first.'; return null; }
+  if (!$('lyrics').value.trim()) { $('err').textContent = 'Paste your lyrics.'; return null; }
+  $('err').textContent = '';
+  const f = new FormData();
+  f.append('song', $('song').files[0]);
+  for (const p of [...$('faces').files].slice(0,3)) f.append('faces', p);
+  [['lyrics', $('lyrics').value], ['vibe', vibe], ['story', $('story').value], ['who', $('who').value],
+   ['motion', motion], ['pin', $('pin').value], ['endcard', $('endcard').value], ['realface', realface]].forEach(([k, v]) => f.append(k, v));
+  return f;
+}
+async function start(url) {
+  const f = form(); if (!f) return;
+  const r = await fetch(url, {method:'POST', body:f}); const j = await r.json();
+  if (!r.ok) { $('err').textContent = j.error || 'Busy — one at a time.'; return; }
+  project = j.project; $('recTitle').textContent = $('tapeTitle').textContent + ' · rec';
+  if (url === '/api/start') { picked = 0; $('takes').innerHTML = [1,2,3].map(i => `<div class="take loading">developing…</div>`).join(''); show('you'); }
+  else show('making');
+  poll();
+}
+$('rec').onclick = () => start('/api/start');
+$('preview').onclick = e => { e.preventDefault(); start('/api/preview'); };
+$('again').onclick = () => start('/api/start');
+$('thatsme').onclick = async () => { if (!picked) return; await api('/api/pick', {take: picked}); show('making'); poll(); };
+$('recut').onclick = async () => { if (!project) return; await api('/api/recut', {}); show('making'); poll(); };
+
+function drawTakes(list) {
+  if (!list.length || document.querySelectorAll('.take img').length === list.length) return;
+  $('takes').innerHTML = list.map((t, i) => `<div class="take" data-i="${i+1}"><img src="/files/${t}?v=${Date.now()}" alt=""><span>take ${i+1}</span></div>`).join('')
+    + '<div class="take loading">developing…</div>'.repeat(Math.max(0, 3 - list.length));
+  document.querySelectorAll('.take[data-i]').forEach(t => t.onclick = () => {
+    document.querySelectorAll('.take').forEach(x => { x.classList.remove('picked'); x.classList.add('wrong'); });
+    t.classList.remove('wrong'); t.classList.add('picked'); picked = +t.dataset.i; $('thatsme').disabled = false; });
+}
+let lastSlots = '';
+function drawSlots(spec) {
+  const s = JSON.stringify(spec || ''); if (!spec || s === lastSlots) return; lastSlots = s;
+  const stills = spec.slots.map(x => (x.media || []).find(m => /\.png$/.test(m))).filter(Boolean);
+  $('strip').innerHTML = stills.map(m => `<img src="/files/${m}" alt="">`).join(''); $('strip').scrollLeft = 1e9;
+  const n = spec.slots.length; $('meter').style.width = (25 + 70 * stills.length / Math.max(1, n)) + '%';
+  $('scenes').innerHTML = '';
+  spec.slots.forEach(x => {
+    const m = (x.media || []).find(q => /\.png$/.test(q)), moving = (x.media || []).some(q => /\.mp4$/.test(q));
+    const d = document.createElement('div'); d.className = 'scene';
+    d.innerHTML = `${m ? `<img src="/files/${m}" alt="">` : '<img alt="" style="background:#2a2033">'}<b>#${x.id}</b>${moving ? '<span class="tag">moves</span>' : ''}
+      <button class="notme">not me</button><textarea>${(x.prompt || '').replace(/</g, '&lt;')}</textarea>`;
+    d.querySelector('button').onclick = async () => { await api('/api/reroll', {id: x.id, prompt: d.querySelector('textarea').value,
+      motion: motion === 'all', pin: $('pin').value}); $('bside').classList.remove('open'); show('making'); poll(); };
+    $('scenes').appendChild(d);
+  });
+}
+function stages(log) {
+  const at = log.slice().reverse().find(l => /^\d\/4/.test(l)); const k = at ? at.slice(0, 3) : null;
+  let seen = false;
+  document.querySelectorAll('#stages li').forEach(li => {
+    if (!k) { li.className = 'todo'; return; }
+    if (li.dataset.k === k) { li.className = 'now'; seen = true; } else li.className = seen ? 'todo' : 'done';
+  });
+}
+async function poll() {
+  clearTimeout(timer);
+  const j = await (await fetch('/api/status?p=' + encodeURIComponent(project))).json();
+  if (j.has_key) keyOn();
+  const log = j.log || [];
+  $('log').textContent = $('log2').textContent = log.slice(-4).join('\n');
+  drawTakes(j.takes || []); drawSlots(j.slots); stages(log);
+  const last = log[log.length - 1] || '';
+  if (/^stopped/.test(last)) $('err').textContent = last;
+  if (!j.busy && j.video) {
+    $('video').src = '/files/' + j.video + '?t=' + Date.now(); $('dl').href = '/files/' + j.video; show('done');
+    document.querySelectorAll('#stages li').forEach(li => li.className = 'done'); $('meter').style.width = '100%';
+  }
+  if (j.busy) timer = setTimeout(poll, 3000);
+}
+fetch('/api/status?p=_').then(r => r.json()).then(j => { if (j.has_key) keyOn(); });
+</script>
+</body>
+</html>

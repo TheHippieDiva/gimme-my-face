@@ -1,0 +1,11 @@
+out/
+samples/*.mp3
+__pycache__/
+.env
+# personal: Dawn's face photos, stills, songs and project runs never go public
+projects/
+samples/*_lyrics.txt
+*.mp4
+*.mov
+DEMO-SCRIPT.md
+PUBLIC-CHECKLIST.md

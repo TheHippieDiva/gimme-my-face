@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gimme My Face · Mixtape prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Permanent+Marker&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night:#120d1a; --plum:#2a1838; --tape:#f4e9d4; --tape-ink:#2b2230; --hot:#ff3d6e; --amber:#ffb23f;
+    --teal:#3fd0c9; --violet:#8f6bff; --dim:#b9aec7; --line:rgba(255,255,255,.12);
+    --display:"Bungee", "Arial Black", Impact, sans-serif; --hand:"Permanent Marker", "Comic Sans MS", cursive;
+    --mono:"Space Mono", ui-monospace, Menlo, monospace;
+  }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--night); color:#fff; }
+  body { font:15px/1.45 var(--mono);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(143,107,255,.35), transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, rgba(255,61,110,.28), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0 2px, transparent 2px 4px), var(--night);
+    min-height:100vh; }
+  .app { max-width:440px; margin:0 auto; padding:18px 16px 120px; position:relative; }
+  header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .logo { font:400 26px/0.95 var(--display); letter-spacing:.5px; }
+  .logo b { color:var(--hot); font-weight:400; }
+  .logo small { display:block; font:12px var(--hand); color:var(--amber); letter-spacing:0; margin-top:4px; transform:rotate(-2deg); }
+  .pill { font-size:11px; border:1px solid var(--line); border-radius:99px; padding:4px 10px; color:var(--dim); }
+  .screen { display:none; animation:pop .35s ease; }
+  .screen.on { display:block; }
+  @keyframes pop { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  /* cassette */
+  .cassette { position:relative; margin:8px auto 12px; width:100%; aspect-ratio:2.25; border-radius:14px;
+    background:linear-gradient(180deg,#3a2650,#22152f); border:2px solid #4b3366; box-shadow:0 18px 40px rgba(0,0,0,.45); padding:14px; }
+  .cassette .label { background:var(--tape); color:var(--tape-ink); border-radius:8px; height:54%; padding:6px 12px; position:relative;
+    background-image:linear-gradient(180deg, transparent 18px, var(--hot) 18px 21px, transparent 21px, transparent 36px, var(--teal) 36px 39px, transparent 39px); }
+  .cassette .side { position:absolute; left:10px; top:6px; font:400 14px var(--display); color:var(--hot); }
+  .cassette .title { font:20px var(--hand); text-align:center; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 26px; }
+  .window { position:absolute; left:50%; bottom:9%; transform:translateX(-50%); width:44%; height:34%; background:#110b18; border-radius:30px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 6%; border:2px solid #4b3366; }
+  .reel { width:30%; aspect-ratio:1; border-radius:50%; background:
+      conic-gradient(from 0deg, #f4e9d4 0 10%, transparent 10% 33%, #f4e9d4 33% 43%, transparent 43% 66%, #f4e9d4 66% 76%, transparent 76%),
+      radial-gradient(circle, #1b1224 30%, #6b4a2b 31% 70%, #3b2716 71%); border:2px solid #f4e9d4; }
+  .spinning .reel { animation:spin 1.2s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .screws::before, .screws::after { content:""; position:absolute; width:8px; height:8px; border-radius:50%; background:#7a5e96; bottom:8px; }
+  .screws::before { left:10px; } .screws::after { right:10px; }
+
+  /* drops */
+  .drops { display:grid; gap:8px; }
+  .drop { display:flex; gap:12px; align-items:center; background:rgba(255,255,255,.05); border:1.5px dashed rgba(255,255,255,.22);
+    border-radius:14px; padding:9px 12px; cursor:pointer; transition:.2s; }
+  .drop:hover { border-color:var(--amber); background:rgba(255,178,63,.08); }
+  .drop.done { border-style:solid; border-color:var(--teal); }
+  .drop .n { font:400 22px var(--display); color:var(--amber); width:28px; text-align:center; }
+  .drop h3 { margin:0; font:400 15px var(--display); letter-spacing:.3px; }
+  .drop p { margin:2px 0 0; color:var(--dim); font-size:12px; }
+  .drop .thumbs { margin-left:auto; display:flex; }
+  .polaroid { width:42px; background:#fff; padding:3px 3px 10px; box-shadow:0 4px 10px rgba(0,0,0,.4); margin-left:-10px; }
+  .polaroid:nth-child(1) { transform:rotate(-8deg); } .polaroid:nth-child(2) { transform:rotate(5deg); } .polaroid:nth-child(3) { transform:rotate(-2deg); }
+  .polaroid img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+  .check { margin-left:auto; color:var(--teal); font:400 18px var(--display); }
+
+  .vibes { display:flex; gap:8px; margin:12px -16px 4px; padding:4px 16px 6px; overflow-x:auto; scrollbar-width:none; }
+  .sticker { flex:0 0 auto; }
+  .sticker { font:13px var(--hand); padding:7px 12px; border-radius:10px; cursor:pointer; color:#1a1020; transform:rotate(var(--r,0deg));
+    box-shadow:0 3px 0 rgba(0,0,0,.35); border:2px solid transparent; transition:.15s; }
+  .sticker.on { border-color:#fff; transform:rotate(0) scale(1.07); }
+  .s1 { background:var(--amber); --r:-3deg; } .s2 { background:var(--teal); --r:2deg; } .s3 { background:var(--hot); color:#fff; --r:-1deg; }
+  .s4 { background:#c6ff5e; --r:3deg; } .s5 { background:var(--violet); color:#fff; --r:-2deg; }
+
+  /* REC */
+  .rec-wrap { text-align:center; margin:14px 0 6px; }
+  .rec { width:150px; height:150px; border-radius:50%; border:0; cursor:pointer; position:relative;
+    background:radial-gradient(circle at 35% 30%, #ff7d9c, var(--hot) 45%, #b5123f); color:#fff;
+    box-shadow:0 0 0 8px #2b1a38, 0 0 0 10px #5b3d78, 0 14px 0 6px #1a0f24, 0 30px 50px rgba(255,61,110,.35);
+    font:400 22px/1 var(--display); transition:transform .08s; }
+  .rec:active { transform:translateY(6px); box-shadow:0 0 0 8px #2b1a38, 0 0 0 10px #5b3d78, 0 6px 0 6px #1a0f24; }
+  .rec small { display:block; font:11px var(--mono); letter-spacing:2px; opacity:.85; margin-top:6px; }
+  .rec .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#fff; margin-bottom:8px; animation:blink 1.4s infinite; }
+  @keyframes blink { 50% { opacity:.2; } }
+  .fine { color:var(--dim); font-size:11px; text-align:center; margin:14px 0 0; }
+  .fine a { color:var(--amber); }
+
+  /* is this you */
+  h2 { font:400 30px/1 var(--display); margin:10px 0 4px; }
+  h2 em { font:34px var(--hand); color:var(--amber); font-style:normal; }
+  .sub { color:var(--dim); margin:0 0 14px; }
+  .takes { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .take { background:#fff; padding:6px 6px 26px; cursor:pointer; position:relative; transition:.2s; box-shadow:0 8px 18px rgba(0,0,0,.45); }
+  .take:nth-child(1){transform:rotate(-3deg)} .take:nth-child(2){transform:rotate(2deg)} .take:nth-child(3){transform:rotate(-1deg)}
+  .take img { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
+  .take span { position:absolute; bottom:4px; left:0; right:0; text-align:center; color:#222; font:13px var(--hand); }
+  .take.picked { outline:4px solid var(--teal); transform:rotate(0) scale(1.05); }
+  .take.wrong img { filter:grayscale(.2); }
+  .take.wrong::after { content:"NOT ME"; position:absolute; top:40%; left:-6px; right:-6px; text-align:center; font:400 20px var(--display);
+    color:var(--hot); border:3px solid var(--hot); transform:rotate(-14deg); background:rgba(255,255,255,.7); }
+  .row { display:flex; gap:10px; margin-top:18px; }
+  .btn { flex:1; border:0; border-radius:12px; padding:14px; font:400 15px var(--display); cursor:pointer; }
+  .btn.yes { background:var(--teal); color:#0d1b1a; } .btn.no { background:transparent; color:#fff; border:1.5px solid var(--line); }
+
+  /* making */
+  .stages { list-style:none; padding:0; margin:6px 0 14px; }
+  .stages li { padding:8px 0; border-bottom:1px dashed var(--line); display:flex; gap:10px; align-items:center; color:var(--dim); }
+  .stages li.done { color:#fff; } .stages li.done::before { content:"✓"; color:var(--teal); font-weight:700; }
+  .stages li.now { color:var(--amber); } .stages li.now::before { content:"●"; animation:blink 1s infinite; }
+  .stages li.todo::before { content:"○"; }
+  .strip { display:flex; gap:6px; overflow-x:auto; padding:8px; background:#0a0710; border-radius:8px;
+    border-top:8px dotted #2c1f38; border-bottom:8px dotted #2c1f38; }
+  .strip img { height:120px; aspect-ratio:9/16; object-fit:cover; border-radius:3px; animation:pop .4s ease; }
+  .meter { height:10px; background:#24182f; border-radius:99px; overflow:hidden; margin-top:12px; }
+  .meter i { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--teal),var(--amber),var(--hot)); transition:width .5s; }
+
+  /* done */
+  .phone { width:236px; margin:6px auto 16px; border-radius:30px; padding:9px; background:#0a0710; border:2px solid #3b2a4c;
+    box-shadow:0 25px 60px rgba(0,0,0,.6), 0 0 60px rgba(143,107,255,.25); }
+  .phone video { width:100%; border-radius:22px; display:block; aspect-ratio:9/16; object-fit:cover; background:#000; }
+  .shares { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .share { background:rgba(255,255,255,.06); border:1.5px solid var(--line); border-radius:12px; padding:12px 10px; text-align:left; color:#fff; cursor:pointer; font:inherit; }
+  .share b { display:block; font:400 13px var(--display); } .share span { color:var(--dim); font-size:11px; }
+  .share.main { grid-column:1/-1; background:var(--amber); color:#1a1020; border-color:var(--amber); text-align:center; }
+  .share.main span { color:#3b2a1a; }
+  .reveal { display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; margin:16px 0 0; }
+  .reveal figure { margin:0; background:#fff; padding:5px 5px 22px; position:relative; }
+  .reveal img { width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
+  .reveal figcaption { position:absolute; bottom:3px; left:0; right:0; text-align:center; color:#222; font:12px var(--hand); }
+  .reveal .arrow { font:400 18px var(--display); color:var(--hot); }
+
+  /* B-side drawer */
+  .bside-tab { position:fixed; left:50%; bottom:0; transform:translateX(-50%); width:min(440px,100%); z-index:5;
+    background:linear-gradient(180deg,#3a2650,#24172f); border:2px solid #4b3366; border-bottom:0; border-radius:18px 18px 0 0;
+    padding:10px 16px 14px; cursor:pointer; text-align:center; font:400 14px var(--display); }
+  .bside-tab small { display:block; font:11px var(--mono); color:var(--dim); }
+  .bside { position:fixed; left:50%; bottom:0; transform:translate(-50%,100%); width:min(440px,100%); max-height:82vh; overflow:auto; z-index:6;
+    background:#1b1226; border:2px solid #4b3366; border-bottom:0; border-radius:18px 18px 0 0; padding:16px; transition:transform .35s ease; }
+  .bside.open { transform:translate(-50%,0); }
+  .bside h3 { font:400 20px var(--display); margin:0 0 2px; } .bside h3 em { color:var(--hot); font-style:normal; }
+  .knob { margin:14px 0; }
+  .knob label { display:flex; flex-wrap:wrap; justify-content:space-between; gap:2px 10px; font-weight:700; font-size:13px; }
+  .knob label span { color:var(--amber); font-weight:400; }
+  input[type=range] { width:100%; accent-color:var(--hot); }
+  .switch3 { display:grid; grid-template-columns:repeat(3,1fr); background:#0f0a15; border-radius:10px; padding:3px; gap:3px; }
+  .switch3 button { border:0; border-radius:8px; padding:9px 4px; background:transparent; color:var(--dim); font:12px var(--mono); cursor:pointer; }
+  .switch3 button.on { background:var(--violet); color:#fff; }
+  .bside input[type=text] { width:100%; background:#0f0a15; border:1px solid var(--line); border-radius:10px; padding:10px; color:#fff; font:13px var(--mono); }
+  .scenes { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .scene { position:relative; } .scene img { width:100%; aspect-ratio:9/16; object-fit:cover; border-radius:6px; display:block; }
+  .scene b { position:absolute; top:3px; left:4px; font:10px var(--mono); background:rgba(0,0,0,.6); padding:1px 4px; border-radius:4px; }
+  .scene button { position:absolute; bottom:4px; left:4px; right:4px; border:0; border-radius:6px; background:rgba(255,61,110,.9); color:#fff; font:10px var(--mono); padding:4px; cursor:pointer; }
+  .close { float:right; background:none; border:0; color:var(--dim); font:400 20px var(--display); cursor:pointer; }
+  .nav { position:fixed; bottom:84px; right:8px; display:flex; flex-direction:column; gap:4px; z-index:9; opacity:.6; }
+  .nav button { border:1px solid var(--line); background:rgba(0,0,0,.4); color:var(--dim); border-radius:6px; font:11px var(--mono); padding:4px 7px; cursor:pointer; }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+<div class="nav" aria-label="prototype screens"><button data-go="home">1</button><button data-go="you">2</button><button data-go="making">3</button><button data-go="done">4</button></div>
+<div class="app">
+  <header>
+    <div class="logo">GIMME MY <b>FACE</b><small>my face · my song · my video</small></div>
+    <span class="pill" id="keypill">🔑 key ✓</span>
+  </header>
+
+  <!-- 1 · SIDE A -->
+  <section class="screen on" id="home">
+    <div class="cassette screws"><div class="label"><span class="side">A</span><div class="title" id="tapeTitle">AI N00b · Dawn de Brantes</div></div>
+      <div class="window"><div class="reel"></div><div class="reel"></div></div></div>
+    <div class="drops">
+      <div class="drop done" id="d1"><span class="n">1</span><div><h3>Drop your song</h3><p>AI N00b.mp3 · 2:43 · or paste a Suno link</p></div><span class="check">✓</span></div>
+      <div class="drop done" id="d2"><span class="n">2</span><div><h3>Drop your face</h3><p>1–3 real photos. Glasses on if you wear 'em.</p></div>
+        <div class="thumbs"><div class="polaroid"><img src="../../out/proto/real1.jpg" alt=""></div><div class="polaroid"><img src="../../out/proto/real2.jpg" alt=""></div><div class="polaroid"><img src="../../out/proto/look.jpg" alt=""></div></div></div>
+      <div class="drop done" id="d3"><span class="n">3</span><div><h3>Paste your lyrics</h3><p>27 lines · we time every word to the beat</p></div><span class="check">✓</span></div>
+    </div>
+    <div class="vibes" id="vibes">
+      <span class="sticker s1 on">dark + moody</span><span class="sticker s2">witchy</span><span class="sticker s3">neon '85</span>
+      <span class="sticker s4">golden hour</span><span class="sticker s5">dreamy</span>
+    </div>
+    <div class="rec-wrap"><button class="rec" id="rec"><span class="dot"></span><br>GIMME<br>MY FACE<small>PRESS REC</small></button></div>
+    <p class="fine">≈ $3 of GPU on <b>your</b> Comfy account · ~15 min<br>No key? <a href="#">free beat + lyric preview</a> on this computer.</p>
+  </section>
+
+  <!-- 2 · IS THIS YOU -->
+  <section class="screen" id="you">
+    <h2>Is this <em>you?</em></h2>
+    <p class="sub">Tap the one that's you. That face goes in every scene.</p>
+    <div class="takes" id="takes">
+      <div class="take"><img src="../../out/proto/t1.jpg" alt=""><span>take 1</span></div>
+      <div class="take wrong"><img src="../../out/proto/wrong.jpg" alt=""><span>take 2</span></div>
+      <div class="take picked"><img src="../../out/proto/look.jpg" alt=""><span>take 3</span></div>
+    </div>
+    <div class="row"><button class="btn no">Nope. Again.</button><button class="btn yes" data-go="making">That's me →</button></div>
+    <p class="fine">AI kept giving me someone else's face. So I built this.</p>
+  </section>
+
+  <!-- 3 · MAKING -->
+  <section class="screen" id="making">
+    <div class="cassette screws spinning" id="cas2"><div class="label"><span class="side">A</span><div class="title">AI N00b · rec</div></div>
+      <div class="window"><div class="reel"></div><div class="reel"></div></div></div>
+    <ul class="stages" id="stages">
+      <li class="done">Rewinding your lyrics to the beat</li>
+      <li class="done">Writing the storyboard</li>
+      <li class="now">Making you, you · scene 9 of 23</li>
+      <li class="todo">Face pin: putting you in motion</li>
+      <li class="todo">Cutting on the beat + captions on top</li>
+    </ul>
+    <div class="strip" id="strip"></div>
+    <div class="meter"><i id="meter"></i></div>
+    <p class="fine">Go grab a Tab. We'll ding you.</p>
+  </section>
+
+  <!-- 4 · DONE -->
+  <section class="screen" id="done">
+    <h2>That's <em>you.</em></h2>
+    <div class="phone"><video src="../../out/proto/chorus.mp4" autoplay muted loop playsinline controls></video></div>
+    <div class="shares">
+      <button class="share main"><b>SAVE THE VIDEO</b><span>1080×1920 · 2:43 · captions on</span></button>
+      <button class="share"><b>15-SEC HOOK</b><span>the chorus, for Reels + TikTok</span></button>
+      <button class="share"><b>THE REVEAL</b><span>wrong face → my face</span></button>
+      <button class="share"><b>MAKE YOURS</b><span>link back to the app</span></button>
+      <button class="share"><b>END CARD</b><span>"A HippieDiva Joint"</span></button>
+    </div>
+    <div class="reveal">
+      <figure><img src="../../out/proto/wrong.jpg" alt=""><figcaption>what AI gave me</figcaption></figure>
+      <span class="arrow">→</span>
+      <figure><img src="../../out/proto/look.jpg" alt=""><figcaption>gimme my face</figcaption></figure>
+    </div>
+  </section>
+</div>
+
+<div class="bside-tab" id="openB">B-SIDE ▲<small>the pro drawer</small></div>
+<aside class="bside" id="bside" aria-label="Pro drawer">
+  <button class="close" id="closeB">×</button>
+  <h3>B-<em>SIDE</em></h3>
+  <p class="sub" style="font-size:12px">For when you want your hands on the knobs.</p>
+  <div class="knob"><label>Face strength <span id="fsv">0.70</span></label><input type="range" min="0.4" max="1" step="0.05" value="0.7" id="fs">
+    <p class="sub" style="font-size:11px;margin:4px 0 0">More = your face holds harder, less movement.</p></div>
+  <div class="knob"><label>Motion</label><div class="switch3"><button>stills</button><button class="on">key moments</button><button>every scene</button></div></div>
+  <div class="knob"><label>Ink fix</label><input type="text" placeholder="L upper arm: Ganesha in a lotus · R arm: tree of life"></div>
+  <div class="knob"><label>End card</label><input type="text" value="A HippieDiva Joint"></div>
+  <div class="knob"><label>Scenes <span>tap re-roll, or drop in your real clip</span></label><div class="scenes" id="scenes"></div></div>
+  <button class="btn yes" style="width:100%">RE-CUT THE VIDEO</button>
+</aside>
+
+<script>
+const shots = [0,1,2,3,4,5,6,7,8].map(i => `../../out/proto/s${i}.jpg`).concat(['../../out/proto/t2.jpg','../../out/proto/t3.jpg']);
+const go = id => { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); window.scrollTo(0,0); if (id === 'making') making(); };
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+document.getElementById('rec').onclick = () => go('you');
+document.querySelectorAll('.sticker').forEach(s => s.onclick = () => { document.querySelectorAll('.sticker').forEach(x => x.classList.remove('on')); s.classList.add('on'); });
+document.querySelectorAll('.take').forEach(t => t.onclick = () => { document.querySelectorAll('.take').forEach(x => x.classList.remove('picked')); t.classList.add('picked'); });
+document.querySelectorAll('.switch3 button').forEach(b => b.onclick = () => { b.parentNode.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); });
+const fs = document.getElementById('fs'); fs.oninput = () => document.getElementById('fsv').textContent = (+fs.value).toFixed(2);
+document.getElementById('openB').onclick = () => document.getElementById('bside').classList.add('open');
+document.getElementById('closeB').onclick = () => document.getElementById('bside').classList.remove('open');
+document.getElementById('scenes').innerHTML = shots.slice(0,8).map((s,i) => `<div class="scene"><img src="${s}" alt=""><b>#${String(i+3).padStart(2,'0')}</b><button>re-roll</button></div>`).join('');
+// ?still=SCREEN  -> no animation, jump to a screen (for mockup captures); add &b to open the B-side
+const q = new URLSearchParams(location.search);
+if (q.has('still')) {
+  const st = document.createElement('style'); st.textContent = '*{animation:none!important;transition:none!important}'; document.head.appendChild(st);
+  document.querySelector('.nav').style.display = 'none';
+  const id = q.get('still') || 'home';
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  if (id === 'making') { const strip = document.getElementById('strip');
+    shots.slice(0,5).forEach(src => { const im = new Image(); im.src = src; strip.appendChild(im); });
+    document.getElementById('meter').style.width = '55%'; }
+  if (q.has('b')) document.getElementById('bside').classList.add('open');
+}
+let timer;
+function making() {
+  clearInterval(timer); const strip = document.getElementById('strip'); strip.innerHTML = ''; let k = 0;
+  timer = setInterval(() => {
+    if (k >= shots.length) { clearInterval(timer); return; }
+    const im = new Image(); im.src = shots[k++]; strip.appendChild(im); strip.scrollLeft = 1e9;
+    document.getElementById('meter').style.width = (30 + 60 * k / shots.length) + '%';
+  }, 700);
+}
+</script>
+</body>
+</html>
