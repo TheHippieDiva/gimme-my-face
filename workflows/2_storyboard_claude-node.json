@@ -1,0 +1,19 @@
+{
+ "1": {
+  "class_type": "ClaudeNode",
+  "inputs": {
+   "prompt": "Vibe: ...\nThe singer: ...\nItems: ...",
+   "system_prompt": "You storyboard a vertical music video for the singer of this song. The singer's own face is added later.\nThe singer is ONE character for the whole video (continuity is the bible): same face, age, gender, build, hair and ONE outfit\nin every scene, unless the story clearly calls for a costume change.\nFirst line: OUTFIT | one outfit for the whole video, in plain words (fits the singer, the music and the vibe)\nThen ONLY one line per item below, same order, nothing else, in this exact form:\nNN | what (5-12 word note) | prompt | move\n- NN = the item number (01, 02, ...). No \"|\" inside the fields.\n- prompt: one or two plain sentences describing a single photo: the singer (call them \"the person\"; one person only unless\n  the story needs a second person, then describe that one without a face close-up), where she is, what she does, light, mood.\n  Make it fit the vibe and tell the song's story visually; keep a through-line (same place/props recurring).\n- NEVER put lyrics, words, letters, signs, logos, brand names, screens with readable text, or real people's names in a prompt.\n- Safe for work. No children's faces.\n- move: one short sentence of SMALL motion for a 3-second clip (a glance, a smile, hair moving, light sweeping, slow push-in).\n",
+   "model": "Sonnet 5.5"
+  }
+ },
+ "2": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "1",
+    0
+   ]
+  }
+ }
+}

@@ -39,7 +39,8 @@ def text_in(paths):
 
 FACE_FIX = ("Edit image 1 only: give the person in image 1 exactly the face, glasses, skin tone and hair of the person "
             "in image 2 (they are the same person). Keep everything else in image 1 exactly the same: pose, framing, "
-            "clothes, hands, background, light.")
+            "clothes, hands, background, light. Clean forehead and skin: no hair jewellery, beads, charms, clips or marks.")
+# (29 Oct: dread charms in the chosen take kept landing on the forehead as a "mark")
 
 
 def copied_reference(b, a, ref):

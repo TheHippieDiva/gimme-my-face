@@ -9,14 +9,19 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import comfy  # noqa: E402
+import re  # noqa: E402
 
 KEEP = ("Use the person from the reference photos and keep their exact face: same face shape, cheekbones, chin, eyes, "
-        "nose, skin tone, glasses (if any) and smile; never older, never a different person. ")
+        "nose, skin tone, glasses (if any) and smile; never older, never greyer hair, never a different person. "
+        "No hair jewellery, beads, charms or marks on the face unless asked. ")
 NO_TEXT = " No text, no letters, no words, no signs, no logos, no badges."
 
 
 def workflow(face_names, scene, seed=None, w=768, h=1344, keep=True, who=""):
     """who = the singer's own description of their look (hair, ink, build), added after KEEP."""
+    if re.search(r"\b(slim|athletic) build\b", who):
+        # Dawn 29 Oct: picked "slim", the takes still came out fuller. Never "rounder/fuller" (LOOK-BIBLE): say the shape.
+        who += " Slim heart-shaped face, high lifted cheekbones, tapered jaw and chin, slim neck; never heavier or fuller in the face."
     enc = {"clip": ["2", 0], "vae": ["3", 0]}
     for i, n in enumerate(face_names[:3], 1):
         enc[f"image{i}"] = [f"img{i}", 0]

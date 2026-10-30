@@ -73,7 +73,7 @@
   .rec small { display:block; font:11px var(--mono); letter-spacing:2px; opacity:.85; margin-top:6px; }
   .rec .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:#fff; margin-bottom:8px; animation:blink 1.4s infinite; }
   @keyframes blink { 50% { opacity:.2; } }
-  .fine { color:var(--dim); font-size:11px; text-align:center; margin:14px 0 0; }
+  .fine { color:rgba(255,255,255,.78); font-size:15px; line-height:1.4; text-align:center; margin:14px 0 0; }
   .fine a { color:var(--amber); }
 
   /* is this you */

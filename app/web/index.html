@@ -18,7 +18,78 @@
   .keyrow button { border:0; border-radius:10px; padding:0 14px; background:var(--violet); color:#fff; font:400 13px var(--display); cursor:pointer; }
   .err { color:var(--hot); text-align:center; min-height:1em; margin:8px 0 0; }
   .take.loading { display:grid; place-items:center; aspect-ratio:3/4.6; color:#999; font:13px var(--hand); }
-  #log { font:11px var(--mono); color:var(--dim); white-space:pre-wrap; max-height:90px; overflow:auto; margin-top:10px; }
+  #log { font:14px var(--mono); color:rgba(255,255,255,.7); white-space:pre-wrap; max-height:90px; overflow:auto; margin-top:10px; }
+  .drop#d2 { align-items:flex-start; cursor:default; }
+  .faceslots { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:10px; }
+  .fslot { display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; gap:3px; }
+  .fslot input { display:none; }
+  .fslot .ph { width:100%; aspect-ratio:3/4; border:1.5px dashed rgba(255,255,255,.3); border-radius:10px; display:grid; place-items:center;
+    font:22px var(--display); color:var(--dim); overflow:hidden; background:#0b0710; }
+  .fslot .ph img { width:100%; height:100%; object-fit:cover; }
+  .fslot:hover .ph { border-color:var(--amber); }
+  .fslot.over .ph, .drop.over { border-color:var(--teal) !important; background:rgba(46,230,200,.12); }
+  .fslot.done .ph { border-style:solid; border-color:var(--teal); }
+  .fslot b { font:400 13px var(--display); color:#fff; }
+  .fslot small { font-size:12px; color:var(--dim); line-height:1.2; }
+  .eta { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; font:16px var(--mono); color:var(--amber); margin-top:8px; }
+  .eta span:last-child { color:var(--dim); }
+  .take.loading { animation:pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.45; } }
+  .btn.thinking { animation:pulse 1s ease-in-out infinite; cursor:wait; }
+  /* tap cue: the thing you tapped presses in + a teal ring ripples out (+ a tiny buzz on phones) */
+  .tapped { animation:tap .4s ease-out; }
+  @keyframes tap { 0% { transform:scale(1); box-shadow:0 0 0 0 rgba(46,230,200,.75); } 35% { transform:scale(.93); }
+                   100% { transform:scale(1); box-shadow:0 0 0 16px rgba(46,230,200,0); } }
+  .word { color:var(--teal); font-weight:700; margin-right:6px; }
+  .word::before { content:''; display:inline-block; width:8px; height:8px; margin-right:6px; border-radius:50%; background:var(--teal); animation:pulse .9s ease-in-out infinite; vertical-align:1px; }
+  .word:empty { display:none; }
+  .genre { margin:14px 0 0; } .vlabel { margin:12px 0 0; font:400 12px var(--display); color:#fff; }
+  .checks { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:6px; }
+  .chk { position:relative; border-radius:12px; overflow:hidden; outline:3px solid transparent; background:#0b0710; }
+  .chk img { display:block; width:100%; aspect-ratio:9/16; object-fit:cover; }
+  .chk b { position:absolute; top:6px; left:8px; font:12px var(--mono); background:rgba(0,0,0,.6); padding:2px 6px; border-radius:6px; }
+  .chk .cb { display:flex; }
+  .chk .cb button { flex:1; border:0; padding:10px 2px; font:400 11px var(--display); cursor:pointer; color:#fff; background:#2a2033; }
+  .chk .cb .no { background:#6b4a8f; }   /* change order (not GO pink); final colours: Dawn picks the scheme */
+  .chk.ok { outline-color:var(--teal); } .chk.ok .me { background:var(--teal); color:#0b0710; }
+  .btn.go { background:var(--hot); color:#fff; box-shadow:0 0 18px rgba(255,61,110,.45); }   /* PINK = GO / roll / make it so */
+  .btn.go:disabled { background:#4a2a36; color:#b9a3ad; box-shadow:none; }
+  .chk .undo { position:absolute; top:6px; right:8px; border:0; border-radius:8px; padding:5px 9px; background:rgba(0,0,0,.7);
+    color:#fff; font:400 12px var(--display); cursor:pointer; }
+  .chk .cb .er { background:#24323a; }
+  .eraser { position:fixed; inset:0; background:rgba(8,5,12,.92); z-index:90; display:none; place-items:center; padding:16px; }
+  .eraser.on { display:grid; }
+  .erbox { width:min(520px, 100%); }
+  .ertools { display:flex; gap:8px; align-items:center; margin:0 0 8px; }
+  .ertools button { border:0; border-radius:8px; padding:8px 12px; background:#3a2d48; color:#fff; font:400 13px var(--display); cursor:pointer; }
+  .ertools button.on { background:var(--teal); color:#0b0710; }
+  #erSwatch { display:none; width:28px; height:28px; border-radius:50%; border:2px solid #fff; }
+  .erhow { color:#fff; font-size:15px; margin:0 0 10px; text-align:center; }
+  .erwrap { position:relative; width:fit-content; margin:0 auto; }
+  .erwrap img { display:block; max-width:100%; max-height:70vh; border-radius:10px; }
+  .erwrap canvas { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; touch-action:none; }
+  .erbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px; color:#ddd; font:13px var(--mono); }
+  .erbar button { border:0; border-radius:8px; padding:9px 12px; background:#3a2d48; color:#fff; font:400 13px var(--display); cursor:pointer; }
+  .erbar .go { background:var(--teal); color:#0b0710; margin-left:auto; }
+  .chk .cb .fx { background:#3a2d48; }
+  .fixp { display:none; padding:8px; gap:6px; flex-wrap:wrap; background:#160f1e; }
+  .chk.fixing .fixp { display:flex; }
+  .fixp i { font-style:normal; font:12px var(--mono); padding:5px 9px; border-radius:99px; border:1.5px solid rgba(255,255,255,.25); cursor:pointer; color:#ddd; }
+  .fixp i.on { background:var(--amber); border-color:var(--amber); color:#1a1020; }
+  .fixp input { flex:1 1 100%; background:#0b0710; color:#fff; border:1px solid var(--line); border-radius:8px; padding:7px; font:12px var(--mono); }
+  .fixp .go { flex:1 1 100%; border:0; border-radius:8px; padding:9px; background:var(--violet); color:#fff; font:400 13px var(--display); cursor:pointer; }
+  .chk.rolling { animation:pulse 1.2s ease-in-out infinite; }
+  .bhow { background:rgba(46,230,200,.12); border:1px solid var(--teal); border-radius:10px; padding:10px 12px; font-size:14px; color:#fff; margin:0 0 12px; }
+  .drop#dc { align-items:flex-start; cursor:default; }
+  .crow { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:9px; }
+  .crow b { flex:0 0 100%; font:400 12px var(--display); color:#fff; letter-spacing:.3px; }
+  .crow b em { font:11px var(--mono); color:var(--dim); font-style:normal; margin-left:4px; }
+  .crow i { font-style:normal; font:13px var(--mono); padding:6px 11px; border-radius:99px; border:1.5px solid rgba(255,255,255,.22);
+    color:#ddd; cursor:pointer; user-select:none; }
+  .crow i:hover { border-color:var(--amber); }
+  .crow i.on { background:var(--teal); border-color:var(--teal); color:#0b0710; }
+  .charmore { width:100%; margin-top:10px; background:#0b0710; color:#fff; border:1px solid var(--line); border-radius:10px; padding:9px; font:13px var(--mono); }
+  #charinfo { color:var(--teal); }
   .scene .notme { background:rgba(255,61,110,.92); }
   .scene textarea { width:100%; min-height:54px; margin-top:4px; background:#0b0710; color:#ddd; border:1px solid var(--line);
     border-radius:6px; font:10px var(--mono); padding:4px; }
@@ -39,11 +110,31 @@
     <div class="drops">
       <label class="drop" id="d1"><span class="n">1</span><div class="grow"><h3>Drop your song</h3><p id="songinfo">mp3 · wav · m4a</p></div>
         <span class="check" id="c1"></span><input type="file" id="song" accept="audio/*"></label>
-      <label class="drop" id="d2"><span class="n">2</span><div class="grow"><h3>Drop your face</h3><p>1–3 real photos. Glasses on if you wear 'em.</p></div>
-        <div class="thumbs" id="facethumbs"></div><input type="file" id="faces" accept="image/*" multiple></label>
-      <div class="drop" id="d3"><span class="n">3</span><div class="grow"><h3>Paste your lyrics</h3><p id="lyrinfo">we time every word to the beat</p>
+      <div class="drop" id="d2"><span class="n">2</span><div class="grow"><h3>Drop your face: 3 photos</h3>
+        <p id="faceinfo">Just you, face big in the frame, good light. No filters, no sunglasses, no side profiles. Glasses on if you wear 'em.</p>
+        <div class="faceslots">
+          <label class="fslot" data-i="0"><input type="file" accept="image/*" multiple><div class="ph">＋</div><b>1 · Straight on</b><small>eyes to the camera (this one makes your real face)</small></label>
+          <label class="fslot" data-i="1"><input type="file" accept="image/*" multiple><div class="ph">＋</div><b>2 · Three-quarter</b><small>head turned a little, both eyes showing</small></label>
+          <label class="fslot" data-i="2"><input type="file" accept="image/*" multiple><div class="ph">＋</div><b>3 · Big smile</b><small>a real smile, teeth OK</small></label>
+        </div></div></div>
+      <!-- Dawn 29 Oct: "we DEFINITELY need to ask questions... like an RPG when i'm in character dev" (blank = random man in every scene) -->
+      <div class="drop" id="dc"><span class="n">3</span><div class="grow"><h3>Build your character</h3>
+        <p id="charinfo">so every scene starts as YOU (tap one in each row; more where it says so)</p>
+        <div class="crow" data-k="g" data-req="1"><b>I am</b><i>woman</i><i>man</i><i>nonbinary</i></div>
+        <div class="crow" data-k="a" data-req="1"><b>Age</b><i>20s</i><i>30s</i><i>40s</i><i>50s</i><i>60s</i><i>70s+</i></div>
+        <div class="crow" data-k="b"><b>Build</b><i>slim</i><i>athletic</i><i>average</i><i>curvy</i><i>plus-size</i><i>broad</i></div>
+        <div class="crow" data-k="hs" data-multi="1"><b>Hair <em>pick any</em></b><i>long</i><i>short</i><i>curly</i><i>locs / dreads</i><i>braids</i><i>top knot</i><i>bangs</i><i>shaved / bald</i></div>
+        <div class="crow" data-k="hc"><b>Hair colour</b><i>black</i><i>dark brown</i><i>brown</i><i>auburn / red</i><i>blonde</i><i>grey / silver</i><i>fun colour</i></div>
+        <div class="crow" data-k="e" data-multi="1"><b>Extras <em>pick any</em></b><i>glasses</i><i>tattoos</i><i>sleeve tattoos</i><i>beard</i><i>piercings</i><i>freckles</i></div>
+        <input type="text" id="charmore" class="charmore" placeholder="anything else? e.g. blue eyes, scarf headband, nose stud">
+      </div></div>
+      <div class="drop" id="d3"><span class="n">4</span><div class="grow"><h3>Paste your lyrics</h3><p id="lyrinfo">we time every word to the beat</p>
         <textarea id="lyrics" placeholder="[Verse 1]&#10;Came home to a new kind of prison…"></textarea></div></div>
     </div>
+    <!-- Dawn 29 Oct: "give them choices and let them make them within limits and genres" -->
+    <div class="crow genre" data-k="st"><b>The story <em>pick one (or leave it to us)</em></b><i>comeback</i><i>love story</i><i>heartbreak</i><i>party night</i><i>road trip</i><i>spiritual journey</i><i>rebel</i><i>hometown</i><i>dreamer</i></div>
+    <div class="crow genre" data-k="mu"><b>My music <em>pick one: the video moves + looks like it</em></b><i>pop</i><i>hip hop</i><i>R&amp;B / soul</i><i>rock</i><i>country</i><i>folk</i><i>EDM / trance</i><i>punk</i><i>gospel</i><i>latin</i><i>jazz / blues</i><i>indie</i></div>
+    <p class="vlabel">The look</p>
     <div class="vibes" id="vibes">
       <span class="sticker s1 on" data-v="dark, moody, cinematic night, amber light">dark + moody</span>
       <span class="sticker s2" data-v="warm, earthy, witchy, candlelight">witchy</span>
@@ -62,7 +153,10 @@
     <h2>Is this <em>you?</em></h2>
     <p class="sub">Tap the one that's you. That face goes in every scene.</p>
     <div class="takes" id="takes"></div>
-    <div class="row"><button class="btn no" id="again">Nope. Again.</button><button class="btn yes" id="thatsme" disabled>That's me →</button></div>
+    <div class="meter"><i id="meterT"></i></div>
+    <div class="eta"><span><span class="word" id="wordT"></span><span id="etaT">developing your takes…</span></span><span id="etaTIn"></span></div>
+    <p class="fine" id="backT"></p>
+    <div class="row"><button class="btn no" id="again">Not my face</button><button class="btn go" id="thatsme" disabled>That's me →</button></div>
     <div id="log"></div>
     <p class="fine">AI kept giving me someone else's face. So I built this.</p>
   </section>
@@ -79,14 +173,26 @@
     </ul>
     <div class="strip" id="strip"></div>
     <div class="meter"><i id="meter"></i></div>
-    <div id="log2" style="font:11px var(--mono);color:var(--dim);white-space:pre-wrap;max-height:70px;overflow:auto;margin-top:8px"></div>
-    <p class="fine">Go grab a Tab. We'll ding you.</p>
+    <div class="eta"><span><span class="word" id="word"></span><span id="eta">warming up…</span></span><span id="etaIn"></span></div>
+    <div id="log2" style="font:14px var(--mono);color:rgba(255,255,255,.7);white-space:pre-wrap;max-height:70px;overflow:auto;margin-top:8px"></div>
+    <p class="fine" id="back">Nothing's stuck: we're working on it. Go grab a Tab. We'll ding you.</p>
+  </section>
+
+  <!-- 3b · SCENE CHECK (Dawn 29 Oct: an "is this you?" for each scene) -->
+  <section class="screen" id="check">
+    <h2>Is this <em>you</em> in every scene?</h2>
+    <p class="sub">Tap <b>✓ me</b> on each one. <b>↻ not me</b> re-rolls just that scene.</p>
+    <div class="checks" id="checks"></div>
+    <div class="eta"><span><span class="word" id="wordC"></span><span id="checkInfo"></span></span><span></span></div>
+    <div class="row"><button class="btn no" id="allme">✓ all me</button><button class="btn go" id="approve" disabled>LOCK IT → MAKE IT SO</button></div>
+    <p class="fine"><a href="#" id="approveAnyway">finish anyway</a></p>
   </section>
 
   <!-- 4 · DONE -->
   <section class="screen" id="done">
     <h2>That's <em>you.</em></h2>
     <div class="phone"><video id="video" controls playsinline loop></video></div>
+    <p class="fine"><a id="bigvid" target="_blank" href="#">▶ watch it full size</a></p>
     <div class="shares">
       <a class="share main" id="dl" download><b>SAVE THE VIDEO</b><span>1080×1920 · captions on</span></a>
       <button class="share" id="bopen2"><b>NOT ME?</b><span>re-roll any scene in the B-side</span></button>
@@ -100,6 +206,7 @@
   <button class="close" id="closeB">×</button>
   <h3>B-<em>SIDE</em></h3>
   <p class="sub" style="font-size:12px">For when you want your hands on the knobs.</p>
+  <p class="bhow">Your knobs save as you go. When you're set: <b>close this drawer</b>, then press <b>GIMME MY FACE</b> on Side A.</p>
   <div class="knob"><label>Face strength <span id="fsv">0.70</span></label><input type="range" min="0.4" max="1" step="0.05" value="0.7" id="pin">
     <p class="sub" style="font-size:11px;margin:4px 0 0">More = your face holds harder, less movement.</p></div>
   <div class="knob"><label>Real face <span>FaceFusion, on your computer</span></label><div class="switch3" id="realface"><button data-v="on" class="on">my real face</button><button data-v="off">AI face only</button></div></div>
@@ -109,9 +216,19 @@
   <div class="knob"><label>The story <span>optional</span></label><input type="text" id="story" placeholder="rebuilding an old muscle car, and my life"></div>
   <div class="knob"><label>End card</label><input type="text" id="endcard" placeholder="A ___ Joint"></div>
   <div class="knob"><label>Scenes <span>"not me" re-rolls just that one</span></label><div class="scenes" id="scenes"><p class="sub" style="font-size:11px">Scenes show up here once they're made.</p></div></div>
-  <button class="btn yes" style="width:100%" id="recut">RE-CUT THE VIDEO</button>
+  <button class="btn yes" style="width:100%" id="bdone">✓ SET · BACK TO GIMME MY FACE</button>
+  <button class="btn go" style="width:100%;display:none;margin-top:8px" id="recut">MAKE IT SO</button>
 </aside>
 
+<!-- ERASER (Dawn 29 Oct: '"artifact" removal = eraser' / "people understand erasing something") -->
+<div class="eraser" id="eraser"><div class="erbox">
+  <div class="ertools"><button id="tErase" class="on">⌫ erase</button><button id="tColour">🎨 colour</button>
+    <span id="erSwatch" title="the colour you picked"></span></div>
+  <p class="erhow" id="erHow">Paint over the spot you want gone. <b>Erase it</b> fills it in from around it.</p>
+  <div class="erwrap"><img id="erImg" alt=""><canvas id="erCan"></canvas></div>
+  <div class="erbar"><label>brush <input type="range" id="erSize" min="6" max="60" value="18"></label>
+    <button id="erUndo">undo</button><button id="erCancel">cancel</button><button id="erGo" class="go">⌫ Erase it</button></div>
+</div></div>
 <script>
 const $ = id => document.getElementById(id);
 let project = null, timer = null, picked = 0, vibe = document.querySelector('.sticker.on').dataset.v, motion = 'key';
@@ -119,9 +236,54 @@ const show = id => { document.querySelectorAll('.screen').forEach(s => s.classLi
 const api = (url, body) => fetch(url, {method:'POST', body: JSON.stringify(Object.assign({p: project}, body))});
 
 $('song').onchange = () => { const f = $('song').files[0]; if (!f) return;
+  // say how long it is, and flag a short clip (29 Oct: a 16 s clip with a whole song's lyrics)
+  const au = new Audio(URL.createObjectURL(f)); au.onloadedmetadata = () => { const d = au.duration;
+    $('songinfo').textContent = `${f.name} · ${mmss(d)}` + (d < 60 ? ` · short clip! We'll only use the lyrics we hear in it.` : '');
+    $('songinfo').style.color = d < 60 ? 'var(--amber)' : ''; };
   $('tapeTitle').textContent = f.name.replace(/\.[^.]+$/, ''); $('songinfo').textContent = f.name; $('c1').textContent = '✓'; $('d1').classList.add('done'); };
-$('faces').onchange = () => { $('facethumbs').innerHTML = [...$('faces').files].slice(0,3).map(f =>
-  `<div class="polaroid"><img src="${URL.createObjectURL(f)}" alt=""></div>`).join(''); $('d2').classList.add('done'); };
+// 3 face slots (Dawn 29 Oct: "we need at least 3 and we need to tell people which views/shots"). Each slot has its own
+// picker; picking several files at once fills this slot, then the empty slots after it.
+const faceFiles = [null, null, null];
+function drawFaces() {
+  document.querySelectorAll('.fslot').forEach(s => {
+    const f = faceFiles[+s.dataset.i];
+    s.querySelector('.ph').innerHTML = f ? `<img src="${URL.createObjectURL(f)}" alt="">` : '＋';
+    s.classList.toggle('done', !!f);
+  });
+  $('d2').classList.toggle('done', faceFiles.every(Boolean));
+}
+// drag + drop (Dawn 29 Oct: "drag glitches"): photos onto any slot (several fill the empty slots after it),
+// the song onto box 1. Dropping anywhere else on the page does nothing (no opening the file in the browser).
+function fillFaces(first, files) {
+  let i = first;
+  for (const f of [...files].filter(f => f.type.startsWith('image/'))) {
+    while (i < 3 && i !== first && faceFiles[i]) i++;
+    if (i > 2) break;
+    faceFiles[i++] = f;
+  }
+  drawFaces(); cue($('d2'));
+}
+['dragover', 'drop'].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
+document.querySelectorAll('.fslot').forEach(sl => {
+  sl.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); sl.classList.add('over'); });
+  sl.addEventListener('dragleave', () => sl.classList.remove('over'));
+  sl.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); sl.classList.remove('over'); fillFaces(+sl.dataset.i, e.dataTransfer.files); });
+});
+$('d2').addEventListener('drop', e => { e.preventDefault(); fillFaces(faceFiles.findIndex(f => !f) < 0 ? 0 : faceFiles.findIndex(f => !f), e.dataTransfer.files); });
+$('d1').addEventListener('dragover', e => { e.preventDefault(); $('d1').classList.add('over'); });
+$('d1').addEventListener('dragleave', () => $('d1').classList.remove('over'));
+$('d1').addEventListener('drop', e => { e.preventDefault(); $('d1').classList.remove('over');
+  const f = [...e.dataTransfer.files].find(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|flac|ogg)$/i.test(f.name));
+  if (!f) return; const dt = new DataTransfer(); dt.items.add(f); $('song').files = dt.files; $('song').onchange(); cue($('d1')); });
+document.querySelectorAll('.fslot input').forEach(inp => inp.onchange = () => {
+  const first = +inp.closest('.fslot').dataset.i; let i = first;
+  for (const f of inp.files) {
+    while (i < 3 && i !== first && faceFiles[i]) i++;
+    if (i > 2) break;
+    faceFiles[i++] = f;
+  }
+  inp.value = ''; drawFaces();
+});
 $('lyrics').oninput = () => { const n = $('lyrics').value.split('\n').filter(l => l.trim() && !/^\[.*\]$/.test(l.trim())).length;
   $('lyrinfo').textContent = n ? `${n} lines · we time every word to the beat` : 'we time every word to the beat'; $('d3').classList.toggle('done', n > 0); };
 document.querySelectorAll('.sticker').forEach(s => s.onclick = () => {
@@ -134,36 +296,102 @@ document.querySelectorAll('#realface button').forEach(b => b.onclick = () => {
 $('pin').oninput = () => $('fsv').textContent = (+$('pin').value).toFixed(2);
 $('openB').onclick = $('bopen2').onclick = () => $('bside').classList.add('open');
 $('closeB').onclick = () => $('bside').classList.remove('open');
+$('bdone').onclick = () => { $('bside').classList.remove('open');
+  if ($('home').classList.contains('on')) setTimeout(() => $('rec').scrollIntoView({behavior: 'smooth', block: 'center'}), 250); };
 $('home2').onclick = () => show('home');
 $('savekey').onclick = async () => { if (!$('key').value.trim()) return;
   await fetch('/api/key', {method:'POST', body: JSON.stringify({key: $('key').value})}); $('key').value = ''; keyOn(); };
 function keyOn() { $('keypill').textContent = '🔑 key ✓'; $('keyrow').style.display = 'none'; }
 
+// character creator -> one plain sentence for every scene prompt
+const pickC = {};
+document.querySelectorAll('.crow').forEach(r => r.querySelectorAll('i').forEach(c => c.onclick = () => {
+  if (!r.dataset.multi) r.querySelectorAll('i').forEach(x => x !== c && x.classList.remove('on'));
+  c.classList.toggle('on'); cue(c);
+  pickC[r.dataset.k] = [...r.querySelectorAll('i.on')].map(x => x.textContent.replace(' / ', ' '));
+  const ok = pickC.g?.length && pickC.a?.length; $('dc').classList.toggle('done', !!ok);
+  $('charinfo').textContent = ok ? character() : 'so every scene starts as YOU (tap one in each row; more where it says so)';
+}));
+function character() {
+  const g = pickC.g?.[0], a = pickC.a?.[0]; if (!g || !a) return '';
+  const age = a === '70s+' ? 'in their 70s or older' : `in ${g === 'woman' ? 'her' : g === 'man' ? 'his' : 'their'} ${a}`;
+  const hs = pickC.hs || [], has = x => hs.includes(x);
+  const kind = has('locs dreads') ? 'locs (dreadlocks)' : has('braids') ? 'braids' : 'hair';
+  const hair = has('shaved bald') ? 'a shaved head' : [[has('long') && 'long', has('short') && 'short', has('curly') && 'curly', pickC.hc?.[0], kind].filter(Boolean).join(' '),
+    has('top knot') && 'worn up in a top knot', has('bangs') && 'with bangs'].filter(Boolean).join(' ');
+  const ex = (pickC.e || []).map(x => x === 'glasses' ? 'wears glasses' : x === 'beard' ? 'has a beard' : 'has ' + x);
+  return [`The singer is a ${g === 'nonbinary' ? 'nonbinary person' : g} ${age}`, pickC.b?.[0] && `${pickC.b[0]} build`,
+          pickC.hc?.length || hs.length ? hair : '', ...ex, $('charmore').value.trim()].filter(Boolean).join(', ') + '.';
+}
+$('charmore').oninput = () => { if ($('dc').classList.contains('done')) $('charinfo').textContent = character(); };
 function form() {
   if (!$('song').files[0]) { $('err').textContent = 'Drop your song first.'; return null; }
+  if (!character()) { $('err').textContent = 'Build your character first: at least "I am" + "Age".'; $('dc').scrollIntoView({behavior: 'smooth'}); return null; }
   if (!$('lyrics').value.trim()) { $('err').textContent = 'Paste your lyrics.'; return null; }
   $('err').textContent = '';
   const f = new FormData();
   f.append('song', $('song').files[0]);
-  for (const p of [...$('faces').files].slice(0,3)) f.append('faces', p);
-  [['lyrics', $('lyrics').value], ['vibe', vibe], ['story', $('story').value], ['who', $('who').value],
+  for (const p of faceFiles) if (p) f.append('faces', p);
+  [['lyrics', $('lyrics').value], ['vibe', vibe + (pickC.mu?.[0] ? `, styled for a ${pickC.mu[0].replace(' / ', ' and ')} music video` : '')], ['story', [pickC.st?.[0] && `a ${pickC.st[0]} story`, $('story').value.trim()].filter(Boolean).join(': ')], ['who', [character(), $('who').value.trim()].filter(Boolean).join('; ')],
    ['motion', motion], ['pin', $('pin').value], ['endcard', $('endcard').value], ['realface', realface]].forEach(([k, v]) => f.append(k, v));
   return f;
 }
 async function start(url) {
+  if (url === '/api/start' && !faceFiles.every(Boolean)) {
+    $('err').textContent = 'Add all 3 face photos: straight on, three-quarter, big smile.'; return; }
   const f = form(); if (!f) return;
   const r = await fetch(url, {method:'POST', body:f}); const j = await r.json();
   if (!r.ok) { $('err').textContent = j.error || 'Busy — one at a time.'; return; }
-  project = j.project; $('recTitle').textContent = $('tapeTitle').textContent + ' · rec';
-  if (url === '/api/start') { picked = 0; $('takes').innerHTML = [1,2,3].map(i => `<div class="take loading">developing…</div>`).join(''); show('you'); }
+  startClock(); $('meter').style.width = $('meterT').style.width = '0%';
+  project = j.project; try { sessionStorage.setItem('gmf_project', project); } catch (e) {}
+  $('recTitle').textContent = $('tapeTitle').textContent + ' · rec';
+  if (url === '/api/start') { picked = 0; $('thatsme').disabled = true;
+    const w = rerolling ? 're-rolling…' : 'developing…';
+    $('takes').innerHTML = [1,2,3].map(i => `<div class="take loading">${w}</div>`).join('');
+    $('etaT').textContent = rerolling ? 'RE-ROLLING: making 3 new takes of you…' : 'developing your takes…'; show('you'); }
   else show('making');
   poll();
 }
 $('rec').onclick = () => start('/api/start');
 $('preview').onclick = e => { e.preventDefault(); start('/api/preview'); };
-$('again').onclick = () => start('/api/start');
-$('thatsme').onclick = async () => { if (!picked) return; await api('/api/pick', {take: picked}); show('making'); poll(); };
-$('recut').onclick = async () => { if (!project) return; await api('/api/recut', {}); show('making'); poll(); };
+// Dawn 29 Oct: "obvious click indications - something that says 'got it'": every tap answers back
+// the ding when a job finishes: a soft two-note chime + a buzz + the tab title says it's ready
+function ding() {
+  try { const a = new (window.AudioContext || window.webkitAudioContext)();
+    [[880, 0], [1320, 0.18]].forEach(([hz, t]) => { const o = a.createOscillator(), g = a.createGain(); o.frequency.value = hz; o.type = 'sine';
+      g.gain.setValueAtTime(0.0001, a.currentTime + t); g.gain.exponentialRampToValueAtTime(0.25, a.currentTime + t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, a.currentTime + t + 0.9); o.connect(g).connect(a.destination); o.start(a.currentTime + t); o.stop(a.currentTime + t + 1); });
+  } catch (e) {}
+  try { navigator.vibrate && navigator.vibrate([30, 60, 30]); } catch (e) {}
+  document.title = '✓ ready · Gimme My Face';
+}
+function cue(el) { el.classList.remove('tapped'); void el.offsetWidth; el.classList.add('tapped'); try { navigator.userActivation?.hasBeenActive && navigator.vibrate?.(12); } catch (e) {} }
+document.addEventListener('click', e => {
+  const el = e.target.closest('button, .sticker, .take[data-i], .bside-tab, #preview');
+  if (el && !el.disabled) cue(el);
+}, true);
+document.addEventListener('change', e => { const sl = e.target.closest('.fslot'); if (sl) setTimeout(() => cue(sl.querySelector('.ph')), 0);
+  else if (e.target.id === 'song') cue($('d1')); });
+// "thinking" words while the app works, like Claude's "cooking…" (Dawn 29 Oct: "simmering - creating - thinking - designing")
+const WORDS = {takes: ['developing', 'posing', 'lighting', 'framing', 'finding your face', 'thinking'],
+               make: ['cooking', 'simmering', 'storyboarding', 'designing', 'creating', 'mixing', 'rewinding the tape', 'thinking']};
+let busyNow = false, wi = 0;
+setInterval(() => {
+  const onYou = $('you').classList.contains('on'), list = onYou ? WORDS.takes : WORDS.make;
+  const w = busyNow ? list[wi++ % list.length] + '…' : '';
+  $('word').textContent = onYou ? '' : w; $('wordC').textContent = $('check').classList.contains('on') ? w : ''; $('wordT').textContent = onYou ? (rerolling && busyNow && wi % 3 === 1 ? 're-rolling…' : w) : '';
+}, 1600);
+// Dawn 29 Oct: "when they click and it's thinking it needs to be clear that it is doing so - a message must say 'rerolling'"
+let rerolling = false;
+function busyBtn(id, on, text) { const b = $(id); if (!b.dataset.t) b.dataset.t = b.textContent; b.disabled = on; b.textContent = on ? text : b.dataset.t; b.classList.toggle('thinking', on); }
+$('again').onclick = async () => { rerolling = true; busyBtn('again', true, 'RE-ROLLING…'); await start('/api/start');
+  if (!project) { rerolling = false; busyBtn('again', false); } };
+$('thatsme').onclick = async () => { if (!picked) return;
+  busyBtn('thatsme', true, 'LOCKING IN YOUR FACE…');
+  const r = await api('/api/pick', {take: picked}); busyBtn('thatsme', false);
+  if (!r.ok) { $('etaT').textContent = 'still developing your takes: one sec, then tap again'; poll(); return; }   // 409 = takes still busy (29 Oct: a pick during "Again" got dropped)
+  startClock(); $('meter').style.width = '0%'; show('making'); poll(); };
+$('recut').onclick = async () => { if (!project) return; await api('/api/recut', {}); startClock(); $('meter').style.width = '0%'; show('making'); poll(); };
 
 function drawTakes(list) {
   if (!list.length || document.querySelectorAll('.take img').length === list.length) return;
@@ -174,21 +402,169 @@ function drawTakes(list) {
     t.classList.remove('wrong'); t.classList.add('picked'); picked = +t.dataset.i; $('thatsme').disabled = false; });
 }
 let lastSlots = '';
+const rel = m => m.replace(/^.*?\/(out\/|projects\/)/, '$1');   // the face pass writes full paths
+const okd = new Set(); let rolling = null;
+// Dawn 29 Oct: "definitely need more than 'not me'": a scene that's mostly you gets a targeted fix, not a blind re-roll
+const FIXES = {'weird mark': 'Clean, even skin on the forehead and face: no marks, spots, dots, smudges or patches.',
+  'hair': 'Hair exactly like the photos: same colour, same side-swept bangs, no patches or clumps on the forehead.',
+  'grey hair': 'No grey, silver or white hair anywhere: hair colour exactly like the photos, roots to tips.',
+  'glasses': 'The same glasses as the photos: same frame shape and colour.',
+  'eyes': 'Natural eye colour from the photos, soft, not bright or fake.',
+  'face shape': 'Slim heart-shaped face, high cheekbones, tapered jaw; never heavier or older.',
+  'ink': 'Tattoos only where they really are; no invented tattoos.',
+  'outfit': 'The same outfit as every other scene.'};
+function drawChecks(spec, busy) {
+  if (!spec) return;
+  if (!busy) rolling = null;
+  const pics = spec.slots.filter(x => (x.media || []).some(m => /\.png$/.test(m)));
+  $('checks').innerHTML = pics.map(x => {
+    const m = x.media.find(q => /\.png$/.test(q)), r = rolling === x.id;
+    return `<div class="chk ${okd.has(x.id) ? 'ok' : ''} ${r ? 'rolling' : ''}" data-id="${x.id}">
+      <img src="/files/${rel(m)}?v=${encodeURIComponent(m)}" alt=""><b>#${x.id}</b>
+      ${(x.edit_history || []).length && !busy ? '<button class="undo" title="undo the last erase / paint">↶ undo</button>' : ''}
+      <div class="cb"><button class="me">✓ me</button><button class="er" ${busy ? 'disabled' : ''}>⌫ erase</button><button class="fx" ${busy ? 'disabled' : ''}>✎ fix</button><button class="no" ${busy ? 'disabled' : ''}>${r ? 're-rolling…' : '↻ not me'}</button></div>
+      <div class="fixp">${Object.keys(FIXES).map(k => `<i data-k="${k}">${k}</i>`).join('')}
+        <input type="text" placeholder="anything else? e.g. bangs to the left"><button class="go">↻ re-roll with these fixes</button></div></div>`;
+  }).join('');
+  const n = pics.filter(x => okd.has(x.id)).length;
+  $('checkInfo').textContent = busy ? `re-rolling scene ${rolling || ''}…` : `${n} of ${pics.length} scenes are you`;
+  $('approve').disabled = busy || n < pics.length;
+  document.querySelectorAll('.chk').forEach(c => {
+    c.querySelector('.me').onclick = () => { okd.has(c.dataset.id) ? okd.delete(c.dataset.id) : okd.add(c.dataset.id); drawChecks(spec, busy); };
+    c.querySelector('.fx').onclick = () => c.classList.toggle('fixing');
+    c.querySelector('.er').onclick = () => openEraser(c.dataset.id, c.querySelector('img').src, spec);
+    const ub = c.querySelector('.undo');
+    if (ub) ub.onclick = async () => {   // step this scene back one erase/paint
+      const r = await api('/api/undo', {id: c.dataset.id}); const j = await r.json(); if (!r.ok) return;
+      const sl = spec.slots.find(q => q.id === c.dataset.id);
+      sl.media = sl.media.map(q => /\.png$/.test(q) ? j.media : q); sl.edit_history = (sl.edit_history || []).slice(0, -1);
+      drawChecks(spec, false); };
+    c.querySelectorAll('.fixp i').forEach(i => i.onclick = () => i.classList.toggle('on'));
+    c.querySelector('.go').onclick = async () => {
+      const x = spec.slots.find(q => q.id === c.dataset.id);
+      const fixes = [...c.querySelectorAll('.fixp i.on')].map(i => FIXES[i.dataset.k]).concat(c.querySelector('.fixp input').value.trim() || []);
+      if (!fixes.length) return;
+      okd.delete(c.dataset.id); rolling = c.dataset.id; startClock();
+      await api('/api/reroll', {id: c.dataset.id, prompt: (x.prompt || '') + ' Fix: ' + fixes.join(' ')}); drawChecks(spec, true); poll(); };
+    c.querySelector('.no').onclick = async () => { okd.delete(c.dataset.id); rolling = c.dataset.id; startClock();
+      await api('/api/reroll', {id: c.dataset.id}); drawChecks(spec, true); poll(); };
+  });
+}
+let erId = null, erSpec = null, erStrokes = [], erMode = 'erase', erPick = false, erCol = null;
+// 🎨 colour brush (Dawn 29 Oct: "match the hair color like photoshop where you click the source and then where you want to
+// correct the color"; "avoiding re-rolls is crucial"): tap the colour to copy, then paint where it should go
+function erSetMode(m) {
+  erMode = m; erStrokes = []; erPick = m === 'colour' && !erCol; drawEr();
+  $('tErase').classList.toggle('on', m === 'erase'); $('tColour').classList.toggle('on', m === 'colour');
+  $('erGo').textContent = m === 'erase' ? '⌫ Erase it' : '🎨 Paint it';
+  $('erHow').innerHTML = m === 'erase' ? 'Paint over the spot you want gone. <b>Erase it</b> fills it in from around it.'
+    : (erCol ? 'Paint where the colour should go (tap 🎨 again to pick a new colour). Then <b>Paint it</b>.'
+             : '<b>Tap the colour you want</b> (like your real hair), then paint where it should go.');
+}
+$('tErase').onclick = () => erSetMode('erase');
+$('tColour').onclick = () => { if (erMode === 'colour') { erCol = null; } erSetMode('colour'); };
+function erSample(x, y) {   // average a small patch of the picture under the tap
+  const img = $('erImg'), sc = img.naturalWidth / img.clientWidth, c = document.createElement('canvas'), r = 4;
+  c.width = c.height = 2 * r + 1; const g = c.getContext('2d');
+  g.drawImage(img, x * sc - r, y * sc - r, 2 * r + 1, 2 * r + 1, 0, 0, 2 * r + 1, 2 * r + 1);
+  const d = g.getImageData(0, 0, 2 * r + 1, 2 * r + 1).data; let R = 0, G = 0, B = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4) { R += d[i]; G += d[i + 1]; B += d[i + 2]; n++; }
+  erCol = [R / n, G / n, B / n].map(Math.round); $('erSwatch').style.background = `rgb(${erCol})`; $('erSwatch').style.display = 'inline-block';
+  erPick = false; erSetMode('colour');
+}
+function openEraser(id, src, spec) {
+  erId = id; erSpec = spec; erStrokes = []; $('erImg').src = src; $('eraser').classList.add('on'); erSetMode('erase');
+  $('erImg').onload = () => { const c = $('erCan'); c.width = $('erImg').clientWidth; c.height = $('erImg').clientHeight; drawEr(); };
+}
+function drawEr() {
+  const c = $('erCan'), g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height);
+  g.strokeStyle = erMode === 'colour' && erCol ? `rgba(${erCol},.8)` : 'rgba(255,61,110,.65)'; g.lineCap = g.lineJoin = 'round';
+  erStrokes.forEach(st => { g.lineWidth = st.w; g.beginPath(); st.pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.stroke(); });
+}
+(() => {
+  const c = $('erCan'); let on = false;
+  const at = e => { const r = c.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return [t.clientX - r.left, t.clientY - r.top]; };
+  const down = e => { e.preventDefault(); if (erPick) { const p = at(e); return erSample(p[0], p[1]); } on = true; erStrokes.push({w: +$('erSize').value, pts: [at(e), at(e)]}); drawEr(); };
+  const move = e => { if (!on) return; e.preventDefault(); erStrokes[erStrokes.length - 1].pts.push(at(e)); drawEr(); };
+  const up = () => { on = false; };
+  c.addEventListener('mousedown', down); c.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+  c.addEventListener('touchstart', down, {passive: false}); c.addEventListener('touchmove', move, {passive: false}); window.addEventListener('touchend', up);
+})();
+$('erUndo').onclick = () => { erStrokes.pop(); drawEr(); };
+$('erCancel').onclick = () => $('eraser').classList.remove('on');
+$('erGo').onclick = async () => {
+  if (!erStrokes.length) return;
+  const img = $('erImg'), sc = img.naturalWidth / img.clientWidth, m = document.createElement('canvas');
+  m.width = img.naturalWidth; m.height = img.naturalHeight;
+  // transparent background; white strokes = erase, coloured strokes = paint that colour (erase.py reads the alpha)
+  const g = m.getContext('2d'); g.strokeStyle = erMode === 'colour' && erCol ? `rgb(${erCol})` : '#fff'; g.lineCap = g.lineJoin = 'round';
+  erStrokes.forEach(st => { g.lineWidth = st.w * sc; g.beginPath(); st.pts.forEach((p, i) => i ? g.lineTo(p[0] * sc, p[1] * sc) : g.moveTo(p[0] * sc, p[1] * sc)); g.stroke(); });
+  const label = $('erGo').textContent; $('erGo').textContent = erMode === 'erase' ? 'erasing…' : 'painting…'; $('erGo').disabled = true;
+  const r = await api('/api/erase', {id: erId, mask: m.toDataURL('image/png')}); const j = await r.json();
+  $('erGo').textContent = label; $('erGo').disabled = false;
+  if (!r.ok) { $('erhow') && 0; return alert(j.error || 'eraser failed'); }
+  const sl = erSpec.slots.find(x => x.id === erId); (sl.edit_history = sl.edit_history || []).push(sl.media.slice());
+  sl.media = sl.media.map(q => /\.png$/.test(q) ? j.media : q);
+  $('eraser').classList.remove('on'); drawChecks(erSpec, false);
+};
+async function approveGo(e) { if (e) e.preventDefault(); await api('/api/approve', {}); startClock(); $('meter').style.width = '85%'; show('making'); poll(); }
+$('approve').onclick = () => approveGo();
+$('allme').onclick = () => { document.querySelectorAll('.chk').forEach(c => okd.add(c.dataset.id));
+  document.querySelectorAll('.chk').forEach(c => c.classList.add('ok'));
+  $('approve').disabled = false; $('checkInfo').textContent = 'all scenes are you'; };
+$('approveAnyway').onclick = approveGo;
 function drawSlots(spec) {
   const s = JSON.stringify(spec || ''); if (!spec || s === lastSlots) return; lastSlots = s;
   const stills = spec.slots.map(x => (x.media || []).find(m => /\.png$/.test(m))).filter(Boolean);
-  $('strip').innerHTML = stills.map(m => `<img src="/files/${m}" alt="">`).join(''); $('strip').scrollLeft = 1e9;
+  $('strip').innerHTML = stills.map(m => `<img src="/files/${rel(m)}" alt="">`).join(''); $('strip').scrollLeft = 1e9;
   const n = spec.slots.length; $('meter').style.width = (25 + 70 * stills.length / Math.max(1, n)) + '%';
   $('scenes').innerHTML = '';
   spec.slots.forEach(x => {
     const m = (x.media || []).find(q => /\.png$/.test(q)), moving = (x.media || []).some(q => /\.mp4$/.test(q));
     const d = document.createElement('div'); d.className = 'scene';
-    d.innerHTML = `${m ? `<img src="/files/${m}" alt="">` : '<img alt="" style="background:#2a2033">'}<b>#${x.id}</b>${moving ? '<span class="tag">moves</span>' : ''}
+    d.innerHTML = `${m ? `<img src="/files/${rel(m)}" alt="">` : '<img alt="" style="background:#2a2033">'}<b>#${x.id}</b>${moving ? '<span class="tag">moves</span>' : ''}
       <button class="notme">not me</button><textarea>${(x.prompt || '').replace(/</g, '&lt;')}</textarea>`;
     d.querySelector('button').onclick = async () => { await api('/api/reroll', {id: x.id, prompt: d.querySelector('textarea').value,
-      motion: motion === 'all', pin: $('pin').value}); $('bside').classList.remove('open'); show('making'); poll(); };
+      motion: motion === 'all', pin: $('pin').value}); startClock(); $('meter').style.width = '0%'; $('bside').classList.remove('open'); show('making'); poll(); };
     $('scenes').appendChild(d);
   });
+}
+// Wait meter (Dawn 29 Oct: "a meter showing people how much longer they will need to wait"). The clock starts when a job
+// starts (kept in sessionStorage so a reload doesn't reset it); time left = time so far × what's left / what's done.
+let clock = 0;
+function startClock() { busyNow = true; clock = Date.now(); try { sessionStorage.setItem('gmf_clock', clock); } catch (e) {} }
+function getClock() { if (!clock) { try { clock = +sessionStorage.getItem('gmf_clock') || 0; } catch (e) {} } return clock || (clock = Date.now()); }
+const mmss = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function done(j, log) {
+  // fraction done + a "x of y" note, from the stage lines + how many scenes have a picture / a real face
+  const n = j.slots ? j.slots.slots.length : 0;
+  const pics = n ? j.slots.slots.filter(x => (x.media || []).some(m => /\.png$/.test(m))).length : 0;
+  const at = log.map(l => (l.match(/^(\d)(b?)\/4/) || [])[0]).filter(Boolean).pop();
+  if (!at) return [0, ''];
+  if (at === '1/4') return [0.03, 'timing your words'];
+  if (at === '2/4') return [0.08, 'writing the storyboard'];
+  if (at === '3/4') return [0.12 + 0.68 * pics / Math.max(1, n), `${pics} of ${n} scenes`];
+  if (at === '3b/4') { const k = log.slice(log.findLastIndex(l => l.startsWith('3b/4'))).filter(l => l.startsWith('real face on')).length;
+    return [0.80 + 0.15 * k / Math.max(1, n), `real face on ${k} of ${n}`]; }
+  return [0.96, 'cutting on the beat'];
+}
+function eta(f, note, meterId, etaId, inId) {
+  const el = (Date.now() - getClock()) / 1000;
+  if (f > 0) $(meterId).style.width = Math.max(parseFloat($(meterId).style.width) || 0, f * 100) + '%';
+  let left;
+  if (f >= 0.999) left = 'done!';
+  else if (f > 0.1 && el > 20) { const r = el * (1 - f) / f; left = r < 60 ? '≈ under a minute left' : `≈ ${Math.ceil(r / 60)} min left`; }
+  else left = 'measuring…';
+  const pct = Math.min(99, Math.round(f * 100)), r = f > 0.1 && el > 20 ? el * (1 - f) / f : null;
+  if (f < 0.999) left = `${pct}% · ${left}`;
+  $(etaId).textContent = left;
+  document.title = `${pct}% · Gimme My Face`;
+  // "so the user knows you're doing you... and to come back" (Dawn 29 Oct)
+  const backId = meterId === 'meterT' ? 'backT' : 'back';
+  const at = r ? new Date(Date.now() + r * 1000).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'}) : null;
+  $(backId).textContent = at ? `Nothing's stuck: we're on it. Safe to walk away, come back around ${at}. We'll ding you.`
+    : `Nothing's stuck: we're on it. ${meterId === 'meterT' ? 'Your 3 takes take a few minutes.' : 'A full video takes 15–30 min.'} Safe to walk away. We'll ding you.`;
+  $(inId).textContent = `${mmss(el)} in${note ? ' · ' + note : ''}`;
 }
 function stages(log) {
   const at = log.slice().reverse().find(l => /^\d\/4/.test(l)); const k = at ? at.slice(0, 3) : null;
@@ -204,16 +580,43 @@ async function poll() {
   if (j.has_key) keyOn();
   const log = j.log || [];
   $('log').textContent = $('log2').textContent = log.slice(-4).join('\n');
-  drawTakes(j.takes || []); drawSlots(j.slots); stages(log);
+  const onYou = document.getElementById('you').classList.contains('on');
+  // while takes are developing, the files on disk can be last round's: don't show them or allow a pick until the round is done
+  if (!(onYou && j.busy)) drawTakes(j.takes || []);
+  $('thatsme').disabled = !picked || (onYou && j.busy);
+  drawSlots(j.slots); stages(log);
+  if (j.busy) {
+    const nt = log.slice(log.findLastIndex(l => l.startsWith('making 3 takes'))).filter(l => /^take \d of 3 ready/.test(l)).length;
+    if (onYou) { eta(nt / 3, `${nt} of 3 takes`, 'meterT', 'etaT', 'etaTIn'); if (rerolling) $('etaT').textContent = 'RE-ROLLING · ' + $('etaT').textContent; }
+    else { const [f, note] = done(j, log); eta(f, note, 'meter', 'eta', 'etaIn'); }
+  } else if (onYou) { rerolling = false; busyBtn('again', false); }
+  if (!j.busy && (j.takes || []).length) { $('meterT').style.width = '100%'; $('etaT').textContent = 'your takes are ready: tap the one that\'s you'; $('etaTIn').textContent = ''; }
   const last = log[log.length - 1] || '';
   if (/^stopped/.test(last)) $('err').textContent = last;
+  if (!j.busy && /^CHECK/.test(last)) { if (!$('check').classList.contains('on')) show('check'); drawChecks(j.slots, false); }
+  else if (j.busy && $('check').classList.contains('on')) drawChecks(j.slots, true);
   if (!j.busy && j.video) {
-    $('video').src = '/files/' + j.video + '?t=' + Date.now(); $('dl').href = '/files/' + j.video; show('done');
+    $('recut').style.display = ''; $('recut').textContent = 'RE-ROLL IT';   // there's a cut now: a do-over (Dawn: re-roll = the do-over word)
+    $('video').src = '/files/' + j.video + '?t=' + Date.now(); $('dl').href = '/files/' + j.video; $('bigvid').href = '/files/' + j.video; show('done');
     document.querySelectorAll('#stages li').forEach(li => li.className = 'done'); $('meter').style.width = '100%';
   }
+  if (busyNow && !j.busy && !/^stopped/.test(last)) ding();
+  busyNow = !!j.busy;
   if (j.busy) timer = setTimeout(poll, 3000);
 }
 fetch('/api/status?p=_').then(r => r.json()).then(j => { if (j.has_key) keyOn(); });
+(async () => {   // pick up where you left off after a reload (or open ?p=PROJECT)
+  let P = new URLSearchParams(location.search).get('p'); try { P = P || sessionStorage.getItem('gmf_project'); } catch (e) {}
+  if (!P) return;
+  const j = await (await fetch('/api/status?p=' + encodeURIComponent(P))).json();
+  const last = (j.log || []).slice(-1)[0] || '';
+  if (!j.busy && !j.video && !/^CHECK/.test(last) && !(j.slots && j.slots.approved === false)) {
+    if (!(j.slots && !j.slots.approved && j.slots.slots.some(x => (x.media || []).length))) return; }
+  project = P;
+  if (j.busy) show('making');
+  else if (!j.video) { show('check'); drawChecks(j.slots, false); }
+  poll();
+})();
 </script>
 </body>
 </html>

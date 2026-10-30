@@ -88,7 +88,24 @@ class H(BaseHTTPRequestHandler):
             if rel.startswith("..") or not rel.startswith(("out" + os.sep, "projects" + os.sep)) or not os.path.isfile(full):
                 return self._send(404, {"error": "not found"})
             ctype = {".mp4": "video/mp4", ".png": "image/png", ".jpg": "image/jpeg"}.get(os.path.splitext(full)[1], "application/octet-stream")
-            return self._send(200, open(full, "rb").read(), ctype)
+            # byte ranges, so the player can seek / fast-forward (29 Oct: "cant ff to the end")
+            size = os.path.getsize(full)
+            m = re.match(r"bytes=(\d*)-(\d*)", self.headers.get("Range", ""))
+            a, b = 0, size - 1
+            if m and (m.group(1) or m.group(2)):
+                a = int(m.group(1)) if m.group(1) else max(0, size - int(m.group(2)))
+                b = min(int(m.group(2)), size - 1) if m.group(1) and m.group(2) else size - 1
+            with open(full, "rb") as fh:
+                fh.seek(a)
+                data = fh.read(b - a + 1)
+            self.send_response(206 if (a, b) != (0, size - 1) or m else 200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Accept-Ranges", "bytes")
+            if m:
+                self.send_header("Content-Range", f"bytes {a}-{b}/{size}")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            return self.wfile.write(data)
         return self._send(404, {"error": "not found"})
 
     def do_POST(self):
@@ -98,6 +115,47 @@ class H(BaseHTTPRequestHandler):
             if key:
                 os.environ["COMFY_API_KEY"] = key
             return self._send(200, {"ok": True})
+        if u.path == "/api/undo":                     # Dawn 29 Oct: "def need an undo button": step a scene back one edit
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            _, out = paths(slug(body["p"]))
+            slots_path = os.path.join(out, "slots.json")
+            spec = json.load(open(slots_path))
+            sl = next(s for s in spec["slots"] if s["id"] == body["id"])
+            hist = sl.get("edit_history") or []
+            if not hist:
+                return self._send(400, {"error": "nothing to undo"})
+            sl["media"] = hist.pop()
+            sl["edit_history"] = hist
+            json.dump(spec, open(slots_path, "w"), indent=1)
+            png = next((m for m in sl["media"] if m.endswith(".png")), "")
+            return self._send(200, {"ok": True, "media": os.path.relpath(png, ROOT) if os.path.isabs(png) else png, "left": len(hist)})
+        if u.path == "/api/erase":                    # the eraser: paint a spot, it's filled in (local, free, instant)
+            import base64
+            import faceswap
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            name = slug(body["p"])
+            _, out = paths(name)
+            slots_path = os.path.join(out, "slots.json")
+            spec = json.load(open(slots_path))
+            sl = next(s for s in spec["slots"] if s["id"] == body["id"])
+            src = next(m for m in sl["media"] if m.endswith(".png"))
+            src_full = src if os.path.isabs(src) else os.path.join(ROOT, src)
+            os.makedirs(os.path.join(out, "erase"), exist_ok=True)
+            n = len(os.listdir(os.path.join(out, "erase")))
+            mask = os.path.join(out, "erase", f"{sl['id']}_mask{n}.png")
+            open(mask, "wb").write(base64.b64decode(body["mask"].split(",", 1)[1]))
+            dst = os.path.join(out, "erase", f"{sl['id']}_erased{n}.png")
+            import subprocess
+            subprocess.run([os.path.join(faceswap.FF, ".venv", "bin", "python"), "-I", os.path.join(ROOT, "app", "erase.py"),
+                            src_full, mask, dst], capture_output=True)
+            if not os.path.exists(dst):
+                return self._send(500, {"error": "eraser failed"})
+            sl.setdefault("edit_history", []).append(list(sl["media"]))   # for undo
+            # the scene's motion clip was made from the picture BEFORE this edit, so it would bring the fixed spot back
+            # (29 Oct: forehead marks erased on stills still showed in #04/#10/#16/#19/#22's clips): drop it; the still plays
+            sl["media"] = [dst if m == src else m for m in sl["media"] if not m.endswith(".mp4")]
+            json.dump(spec, open(slots_path, "w"), indent=1)
+            return self._send(200, {"ok": True, "media": os.path.relpath(dst, ROOT)})
         if u.path in ("/api/start", "/api/preview"):
             form = cgi.FieldStorage(fp=self.rfile, headers=self.headers, environ={"REQUEST_METHOD": "POST"})
             name = slug(form.getfirst("name", "") or os.path.splitext(form["song"].filename)[0])
@@ -139,7 +197,7 @@ class H(BaseHTTPRequestHandler):
                     return None
             ok = run_job(name, fn)
             return self._send(200 if ok else 409, {"project": name, "started": ok})
-        if u.path in ("/api/pick", "/api/reroll", "/api/recut"):
+        if u.path in ("/api/pick", "/api/reroll", "/api/recut", "/api/approve"):
             body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
             name = slug(body["p"])
             proj, out = paths(name)
@@ -167,10 +225,24 @@ class H(BaseHTTPRequestHandler):
                             if body.get("prompt"):
                                 sl["prompt"] = body["prompt"]
                             sl["media"] = []
+                            sl.pop("media_orig", None)     # else the face pass re-swaps the old picture
                     json.dump(spec, open(slots_path, "w"), indent=1)
                     cb(f"re-rolling scene {body['id']}…")
                     scenes.main(slots_path, out, faces, [body["id"]], bool(body.get("motion")),
                                 float(body.get("pin") or st["pin"] or 0.7), look if os.path.exists(look) else None)
+                    import faceswap
+                    if st.get("realface", "on") != "off" and faces and faceswap.available():
+                        cb(f"real face on scene {body['id']}…")
+                        faceswap.main(slots_path, faces[0], cb)
+                    if not json.load(open(slots_path)).get("approved"):   # still in the scene check: back to it
+                        cb("CHECK: is every scene you? tap ✓ me or ↻ not me on each one")
+                        return None
+                if u.path == "/api/approve":          # every scene OK'd: cut the video
+                    spec = json.load(open(slots_path))
+                    spec["approved"] = True
+                    json.dump(spec, open(slots_path, "w"), indent=1)
+                    cb("4/4 cutting the video on the beat + captions on top…")
+                    return assemble.main(song, out, slots_path)
                 cb("re-cutting the video…")
                 return assemble.main(song, out, slots_path)
             ok = run_job(name, fn)

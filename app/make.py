@@ -44,7 +44,7 @@ def log(msg, cb=None):
 
 
 def make(song, lyrics, out, faces, vibe="dark, moody, cinematic night", story="", look=None, motion="key",
-         pin=0.7, progress=None, end_card=None, who="", realface=True):
+         pin=0.7, progress=None, end_card=None, who="", realface=True, check=True):
     import assemble
     import lyricbeat
     import scenes
@@ -56,8 +56,9 @@ def make(song, lyrics, out, faces, vibe="dark, moody, cinematic night", story=""
         lyricbeat.main(song, lyrics, out)
     if not os.path.exists(slots_path):
         log("2/4 writing the storyboard (Claude on Comfy)…", progress)
-        spec = storyboard.main(out, slots_path, vibe, story)
-        spec["who"] = who
+        spec = storyboard.main(out, slots_path, vibe, story, who)
+        # the character bible goes into EVERY scene prompt: who they are + the one outfit (Dawn 29 Oct)
+        spec["who"] = " ".join(x for x in (who, spec.get("outfit") and f"Wearing in every scene: {spec['outfit']}.") if x)
         if end_card:
             spec["end_card"] = {"text": end_card, "secs": 4}
         json.dump(spec, open(slots_path, "w"), indent=1)
@@ -79,6 +80,10 @@ def make(song, lyrics, out, faces, vibe="dark, moody, cinematic night", story=""
             faceswap.main(slots_path, faces[0], progress)
         else:
             log("3b/4 skipped: FaceFusion isn't installed (see app/faceswap.py)", progress)
+    # Dawn 29 Oct: "there should be a 'is this you?' for each scene check": stop before the cut until every scene is OK'd
+    if check and not json.load(open(slots_path)).get("approved"):
+        log("CHECK: is every scene you? tap ✓ me or ↻ not me on each one", progress)
+        return None
     log("4/4 cutting the video on the beat + captions on top…", progress)
     final = assemble.main(song, out, slots_path)
     log(f"done: {final}", progress)

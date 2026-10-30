@@ -203,6 +203,12 @@ def main(song, lyrics, out):
         heard = hear_words(song)
         json.dump({"song": os.path.basename(song), "words": heard}, open(cache, "w"))
     timed = align(lines, heard)
+    # lines with no word heard aren't in this audio (29 Oct: a 16 s clip + a whole song's lyrics piled every unheard line
+    # onto 0:00 and made 28 scenes for 16 s): leave them out of the captions + the storyboard
+    dropped = [l["text"] for l in timed if not l["heard"]]
+    timed = [l for l in timed if l["heard"]]
+    if dropped:
+        print(f"left out {len(dropped)} lyric lines that aren't in this audio (first: {dropped[0]!r})")
     bpm, beats = beats_of(song)
     json.dump({"song": os.path.basename(song), "bpm": bpm, "beats": beats, "lines": timed},
               open(f"{out}/timeline.json", "w"), indent=1)

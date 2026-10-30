@@ -31,6 +31,24 @@ Pro drawer: re-roll any scene (edit its picture idea), motion off / key moments 
 ink description, end card, re-cut. Every scene is saved clean (no captions) and can be swapped for real footage in
 `out/<song>/slots.json` (`media`).
 
+### Made for people who aren't AI people
+- **Build your character** (like an RPG): I am, age, build, hair, hair colour, extras, story genre, music style. It becomes
+  one sentence pinned into every scene, and the storyboard picks **one outfit for the whole video**, so the person stays the
+  same person from scene to scene.
+- **3 photo slots that say what to shoot**: straight on, three-quarter, big smile.
+- **"Is this you?" twice**: pick your face from 3 takes, then check **every scene** before the cut. On each scene:
+  **✓ me · ⌫ erase · ✎ fix · ↻ not me**.
+  - **⌫ Magic eraser + 🎨 colour brush** (`app/erase.py`) run on your computer, free and instant: paint out a spot, or tap a
+    colour and paint it where it belongs. Every fix you make by hand is a GPU re-roll you don't pay for.
+  - **✎ fix** re-rolls one scene with targeted fixes (weird mark, hair, grey hair, glasses, eyes, face shape, ink, outfit).
+- **Always shows it's working**: a live "cooking… simmering…" status, % done, minutes left, a "come back around 9:41"
+  time and a ding when it's ready.
+- Pink always means GO.
+
+### Workflow files
+The app builds its Comfy graphs in Python so it can fill in your photos and prompts. The same graphs, in ComfyUI API
+format with placeholder inputs, are in [`workflows/`](workflows/) (re-export with `python3 tools/export_workflows.py`).
+
 ## Real face (optional, recommended)
 Install [FaceFusion](https://github.com/facefusion/facefusion) in `~/tools/facefusion` (or set `FACEFUSION_DIR`). Without it the app still runs and skips this step. Note: the face-swap models are licensed for non-commercial use; a paid product needs a commercial license from their makers.
 

@@ -9,3 +9,10 @@ samples/*_lyrics.txt
 *.mov
 DEMO-SCRIPT.md
 PUBLIC-CHECKLIST.md
+# private planning notes (Dawn's business + face research), never public
+CHARACTER-BUILDER.md
+FACE-SCAN.md
+FACE-COUNCIL.md
+COMPETITION-SCAN_*.md
+COMFY-REVIEW/
+app/auto_marks.py
